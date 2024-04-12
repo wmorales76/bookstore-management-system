@@ -43,7 +43,8 @@ public class tftpClient {
 	{
 		//Extract port and IP address from the arguments 
 		String serverAddressStr=args[0];
-        int serverPort=(new Integer(args[1])).intValue();
+        @SuppressWarnings("removal")
+		int serverPort=(new Integer(args[1])).intValue();
         System.out.println("Connecting to " + serverAddressStr + " Through "+serverPort);
         
         //Create the client object
