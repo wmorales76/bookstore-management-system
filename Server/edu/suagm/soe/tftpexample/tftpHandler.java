@@ -5,6 +5,10 @@ import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.Socket;
+import java.util.Arrays;
+import library.Author;
+//import the bst
+import library.BinarySearchTree;
 
 /**************************************************************************
  * 
@@ -23,7 +27,10 @@ public class tftpHandler extends Thread {
 	// Client socket for maintaing connection with the client
 	private Socket clientSocket;
 
-	/***************************************************************************
+	// shared binary search tree
+	private static final BinarySearchTree bst = new BinarySearchTree();
+
+	/***********************************************************************
 	 * Constructor
 	 * 
 	 * @param clientSocket: client socket created when the client connects to
@@ -68,48 +75,39 @@ public class tftpHandler extends Thread {
 				System.out.println("Received Command: " + readCommand);
 
 				switch (readCommand) {
-
 					case tftpCodes.ADD_GENRE:
 						addGenreCommand();
 						break;
-
 					case tftpCodes.ADD_BOOK:
 						addBookCommand();
 						break;
-
 					case tftpCodes.MODIFY_BOOK:
 						modifyBookCommand();
 						break;
 					case tftpCodes.LIST_GENRES:
 						listGenresCommand();
 						break;
-
 					case tftpCodes.LIST_BOOKS:
 						listBooksCommand();
 						break;
 					case tftpCodes.LIST_BOOKS_BY_GENRE:
 						listBooksByGenreCommand();
 						break;
-
 					case tftpCodes.SEARCH_BOOK:
 						searchBookCommand();
 						break;
-
 					case tftpCodes.BUY_BOOK:
 						buyBookCommand();
 						break;
-
 					case tftpCodes.FOUND:
 						foundCommand();
 						break;
 					case tftpCodes.ALREADYEXISTS:
 						alreadyExistsCommand();
 						break;
-
 					case tftpCodes.NOTFOUND:
 						notFoundCommand();
 						break;
-
 					case tftpCodes.EMPTY:
 						emptyCommand();
 						break;
@@ -132,14 +130,54 @@ public class tftpHandler extends Thread {
 		}
 	}
 
-	private void addGenreCommand() {
-		// TODO Auto-generated method stub
+	private synchronized void addGenreCommand() {
+		// read the genre from the client
+		byte[] buffer = new byte[tftpCodes.BUFFER_SIZE];
+		int totalRead = 0;
+
+		System.out.println("Add Genre Command");
+
+		try {
+			int read;
+
+			// Write the OK code: make acknowledgment of ADD GENRE command
+			clientOutputStream.writeInt(tftpCodes.OK);
+			clientOutputStream.flush();
+
+			// Wait for genre name
+			System.out.println("Waiting for the genre name");
+			read = clientInputStream.read(buffer);
+			String genre = new String(buffer).trim();
+			// Save current time for computing transmission time
+			long startTime = System.currentTimeMillis();
+			// print the genre name
+			System.out.println("add genre " + genre);
+
+			// add the genre to the binary search tree
+			// syncronized the access to the tree
+			synchronized (bst) {
+				bst.insertGenre(genre);
+				System.out.println("Genre added: " + genre);
+			}
+			// Send confirmation to the client
+			clientOutputStream.writeInt(tftpCodes.OK);
+			clientOutputStream.flush();
+
+			long endTime = System.currentTimeMillis();
+			System.out.println(totalRead + " bytes read in " + (endTime - startTime) + " ms.");
+			System.out.println("Successful Data transfer");
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 	}
 
-
 	private void addBookCommand() {
-		// TODO Auto-generated method stub
+		// receive the book info from the client
+		byte[] buffer = new byte[tftpCodes.BUFFER_SIZE];
+		int totalRead = 0;
+		System.out.println("Add Book Command");
 
 	}
 
@@ -148,10 +186,35 @@ public class tftpHandler extends Thread {
 
 	}
 
-	private void listGenresCommand() {
-		// TODO Auto-generated method stub
-
+	private synchronized void listGenresCommand() {
+		try {
+			synchronized(bst) {
+				// Fetch genres from the binary search tree and prepare to send them
+				String genres = bst.getGenres(); // Assuming bst.getGenres() returns a formatted string of genres
+				
+				System.out.println("GENRESSSSSSSSSSSSSSSSSSSSSSSSS");
+				System.out.println(genres);
+				byte[] buffer = genres.getBytes();
+				
+				// Send the genres to the client
+				clientOutputStream.write(buffer);
+				clientOutputStream.flush();
+				System.out.println("List Genres Command: Genres sent to the client.");
+			}
+	
+			// Await client's confirmation that genres have been received
+			int clientResponse = clientInputStream.readInt();
+			if (clientResponse == tftpCodes.OK) {
+				System.out.println("Client confirmed receipt of genres.");
+			} else {
+				System.out.println("Client failed to confirm receipt of genres.");
+			}
+		} catch (Exception e) {
+			System.err.println("Error during listGenresCommand: " + e.getMessage());
+			e.printStackTrace();
+		}
 	}
+	
 
 	private void listBooksCommand() {
 		// TODO Auto-generated method stub
@@ -209,105 +272,4 @@ public class tftpHandler extends Thread {
 		}
 	}
 
-	/***************************************************************************
-	 * getCommand Method
-	 * Tasks: Performs get command
-	 * Acknowledges to the client for the received command
-	 * Receives the file name
-	 * Acknowledges to the client for the received file name
-	 * Checks for the correctness of the file name
-	 * if not found, send the FILENOTFOUND error code the client
-	 * if found, transfer the file to the client
-	 * 
-	 **************************************************************************/
-	private void getCommand() {
-		byte[] buffer = new byte[tftpCodes.BUFFER_SIZE];
-		int totalRead = 0;
-
-		System.out.println("Get Command");
-
-		try {
-			int read;
-
-			// Write the OK code: make acknowledgment of GET command
-			clientOutputStream.writeInt(tftpCodes.OK);
-			clientOutputStream.flush();
-
-			// Wait for file name
-			System.out.println("Waiting for the file name");
-			read = clientInputStream.read(buffer);
-
-			// print the file name
-			System.out.println("get " + (new String(buffer)));
-
-			// Send confirmation to the client
-			clientOutputStream.writeInt(tftpCodes.OK);
-			clientOutputStream.flush();
-
-			// Save current time for computing transmission time
-			long startTime = System.currentTimeMillis();
-
-			/*********************************************************
-			 * Write here your code for data transfer
-			 **********************************************************/
-
-			long endTime = System.currentTimeMillis();
-			System.out.println(totalRead + " bytes read in " + (endTime - startTime) + " ms.");
-			System.out.println("Successful Data transfer");
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	/***************************************************************************
-	 * putCommand Method
-	 * Tasks: Performs put command
-	 * Acknowledges to the client for the received command
-	 * Receives the file name
-	 * Acknowledges to the client for the received file name
-	 * Checks for the correctness of the file name
-	 * if found, send the EXISTINGFILE error code the client
-	 * if found, receive file from the client
-	 * 
-	 **************************************************************************/
-	private void putCommand() {
-		byte[] buffer = new byte[tftpCodes.BUFFER_SIZE];
-		int totalRead = 0;
-
-		System.out.println("Put Command");
-
-		try {
-			int read;
-
-			// Write the OK code: make acknowledgment of PUT command
-			clientOutputStream.writeInt(tftpCodes.OK);
-			clientOutputStream.flush();
-
-			// Wait for file name
-			System.out.println("Waiting for the file name");
-			read = clientInputStream.read(buffer);
-
-			// print the file name
-			System.out.println("put " + (new String(buffer)));
-
-			// Send confirmation to the client
-			clientOutputStream.writeInt(tftpCodes.OK);
-			clientOutputStream.flush();
-
-			// Save current time for computing transmission time
-			long startTime = System.currentTimeMillis();
-
-			/*********************************************************
-			 * Write here your code for data transfer
-			 **********************************************************/
-
-			long endTime = System.currentTimeMillis();
-			System.out.println(totalRead + " bytes read in " + (endTime - startTime) + " ms.");
-			System.out.println("Successful Data transfer");
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
 }
