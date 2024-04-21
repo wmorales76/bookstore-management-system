@@ -56,6 +56,11 @@ public class Book {
         this.price = price;
     }
 
+    //create a book
+    public static Book createBook(String title, String plot, String year, int quantity, double price){
+        return new Book(title, plot, year, quantity, price);
+    }
+
     //method to display the book details
     public void display(){
         System.out.println("Book Details");

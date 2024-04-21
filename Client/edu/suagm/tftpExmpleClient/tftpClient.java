@@ -435,7 +435,7 @@ public class tftpClient {
 					break;
 
 				case add_book:
-					if (commandList.size() > 1) {
+					if (commandList.size() ==1) {
 						currentCommand = tftpCodes.ADD_BOOK;
 					} else {
 						currentCommand = tftpCodes.WRONGCOMMAND;

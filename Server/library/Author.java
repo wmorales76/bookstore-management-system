@@ -31,6 +31,10 @@ public class Author {
         this.lastName = lastName;
     }
 
+    //create an author
+    public static Author createAuthor(String firstName, String lastName){
+        return new Author(firstName, lastName);
+    }
     // Method to display author's full name
     public String toString() {
         return lastName + " " + firstName;

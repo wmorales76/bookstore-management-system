@@ -179,6 +179,61 @@ public class tftpHandler extends Thread {
 		int totalRead = 0;
 		System.out.println("Add Book Command");
 
+		try {
+			int read;
+
+			// Write the OK code: make acknowledgment of ADD BOOK command
+			clientOutputStream.writeInt(tftpCodes.OK);
+			clientOutputStream.flush();
+
+			// Wait for book info
+			System.out.println("Waiting for the book info");
+			read = clientInputStream.read(buffer);
+			String bookInfo = new String(buffer).trim();
+			// Save current time for computing transmission time
+			long startTime = System.currentTimeMillis();
+			// print the book info
+			System.out.println("add book \n" + bookInfo);
+
+			// add the book to the binary search tree
+			// syncronized the access to the tree
+			//String bookInfo = title + "|" + genre + "|" + plot + "|" + String.join(",", authors) + "|"
+			//+ year + "|" + price + "|" + quantity;
+			
+			String[] bookInfoArray = bookInfo.split("\\|");
+			String title = bookInfoArray[0];
+			String genre = bookInfoArray[1];
+			String plot = bookInfoArray[2];
+			String[] authors = bookInfoArray[3].split(",");
+			int year = Integer.parseInt(bookInfoArray[4]);
+			double price = Double.parseDouble(bookInfoArray[5]);
+			int quantity = Integer.parseInt(bookInfoArray[6]);
+
+			Author[] authorsArray = new Author[authors.length];
+			for (int i = 0; i < authors.length; i++) {
+				String[] authorInfo = authors[i].split(" ");
+				authorsArray[i] = new Author(authorInfo[0], authorInfo[1]);
+			}
+
+			synchronized (bst) {
+				bst.insertBook(title, genre, plot, year, price, quantity);
+				System.out.println("Book added: " + title);
+			}
+			
+			
+			
+			// Send confirmation to the client
+			clientOutputStream.writeInt(tftpCodes.OK);
+			clientOutputStream.flush();
+
+			long endTime = System.currentTimeMillis();
+			System.out.println(totalRead + " bytes read in " + (endTime - startTime) + " ms.");
+			System.out.println("Successful Data transfer");
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	private void modifyBookCommand() {
