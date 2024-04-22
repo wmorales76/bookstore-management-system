@@ -259,14 +259,10 @@ public class tftpClient {
 				System.out.println("Waiting for confirmation");
 				// Wait for OK code
 				read = socketInputStream.readInt();
-				long startTime = System.currentTimeMillis();
-
 				if (read == tftpCodes.OK) {
 					System.out.println("Genre added successfully");
 				}
 
-				long endTime = System.currentTimeMillis();
-				System.out.println("Genre added in " + (endTime - startTime) + " ms.");
 
 			} else {
 				System.out.println("Error adding genre");

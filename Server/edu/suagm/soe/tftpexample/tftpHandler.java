@@ -5,8 +5,8 @@ import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.Socket;
-import java.util.Arrays;
 import library.Author;
+
 //import the bst
 import library.BinarySearchTree;
 
@@ -148,8 +148,6 @@ public class tftpHandler extends Thread {
 			System.out.println("Waiting for the genre name");
 			read = clientInputStream.read(buffer);
 			String genre = new String(buffer).trim();
-			// Save current time for computing transmission time
-			long startTime = System.currentTimeMillis();
 			// print the genre name
 			System.out.println("add genre " + genre);
 
@@ -162,9 +160,6 @@ public class tftpHandler extends Thread {
 			// Send confirmation to the client
 			clientOutputStream.writeInt(tftpCodes.OK);
 			clientOutputStream.flush();
-
-			long endTime = System.currentTimeMillis();
-			System.out.println(totalRead + " bytes read in " + (endTime - startTime) + " ms.");
 			System.out.println("Successful Data transfer");
 
 		} catch (Exception e) {
@@ -191,7 +186,6 @@ public class tftpHandler extends Thread {
 			read = clientInputStream.read(buffer);
 			String bookInfo = new String(buffer).trim();
 			// Save current time for computing transmission time
-			long startTime = System.currentTimeMillis();
 			// print the book info
 			System.out.println("add book \n" + bookInfo);
 
@@ -200,34 +194,25 @@ public class tftpHandler extends Thread {
 			//String bookInfo = title + "|" + genre + "|" + plot + "|" + String.join(",", authors) + "|"
 			//+ year + "|" + price + "|" + quantity;
 			
+
+			// Split the book info into its components
 			String[] bookInfoArray = bookInfo.split("\\|");
 			String title = bookInfoArray[0];
 			String genre = bookInfoArray[1];
 			String plot = bookInfoArray[2];
 			String[] authors = bookInfoArray[3].split(",");
-			int year = Integer.parseInt(bookInfoArray[4]);
+			String year = bookInfoArray[4];
 			double price = Double.parseDouble(bookInfoArray[5]);
 			int quantity = Integer.parseInt(bookInfoArray[6]);
 
-			Author[] authorsArray = new Author[authors.length];
-			for (int i = 0; i < authors.length; i++) {
-				String[] authorInfo = authors[i].split(" ");
-				authorsArray[i] = new Author(authorInfo[0], authorInfo[1]);
-			}
 
-			synchronized (bst) {
-				bst.insertBook(title, genre, plot, year, price, quantity);
-				System.out.println("Book added: " + title);
-			}
-			
-			
-			
+			//add book to a booklist
+			bst.addBooktoBST(genre, title, plot, authors, year,price, quantity);
+			String book = bst.getBookByTitle(genre, title);
+			System.out.println("Book added: " + book);
 			// Send confirmation to the client
 			clientOutputStream.writeInt(tftpCodes.OK);
 			clientOutputStream.flush();
-
-			long endTime = System.currentTimeMillis();
-			System.out.println(totalRead + " bytes read in " + (endTime - startTime) + " ms.");
 			System.out.println("Successful Data transfer");
 
 		} catch (Exception e) {
@@ -246,8 +231,6 @@ public class tftpHandler extends Thread {
 			synchronized(bst) {
 				// Fetch genres from the binary search tree and prepare to send them
 				String genres = bst.getGenres(); // Assuming bst.getGenres() returns a formatted string of genres
-				
-				System.out.println("GENRESSSSSSSSSSSSSSSSSSSSSSSSS");
 				System.out.println(genres);
 				byte[] buffer = genres.getBytes();
 				

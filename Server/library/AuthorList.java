@@ -53,4 +53,20 @@ public class AuthorList {
         }
 
     }
+
+    //convert all authors in node to string
+    public String toString(){
+        String authors = "";
+        AuthorNode current = head;
+        while (current != null) {
+            authors += current.author.toString();
+            if (current.next != null) {
+                authors += ", ";
+            } else {
+                authors += "\n";
+            }
+            current = current.next;
+        }
+        return authors;
+    }
 }

@@ -5,14 +5,15 @@ public class Book {
     String title, plot,year;
     int quantity;
     double price;
-    
+    AuthorList author;
     //constructor for the class
-    public Book(String title, String plot,String year, int quantity, double price){
+    public Book(String title, String plot,String year, int quantity, double price, AuthorList author){
         this.title = title;
         this.plot = plot;
         this.year = year;
         this.quantity = quantity;
         this.price = price;
+        this.author = author;
     }
 
     //get title
@@ -56,9 +57,20 @@ public class Book {
         this.price = price;
     }
 
+    //set authors
+    public void setAuthors(AuthorList author){
+        this.author = author;
+    }
+
+
     //create a book
-    public static Book createBook(String title, String plot, String year, int quantity, double price){
-        return new Book(title, plot, year, quantity, price);
+    public static Book createBook(String title, String plot, String year, int quantity, double price, AuthorList author){
+        return new Book(title, plot, year, quantity, price, author);
+    }
+
+    //convert book to string formatted
+    public String toString(){
+        return title + " " + plot + " " + year + " " + quantity + " " + price + " " + author.toString();
     }
 
     //method to display the book details

@@ -12,19 +12,17 @@ public class BookList {
 
     private class Node {
         Book book;
-        AuthorList author;
         Node prev;
         Node next;
 
-        public Node(Book book, AuthorList author) {
+        public Node(Book book) {
             this.book = book;
-            this.author = author;
         }
     }
 
     // Method to insert a new book in sorted order based on the title
-    public void insertSorted(Book myBook, AuthorList author) {
-        Node newNode = new Node(myBook, author);
+    public void insertSorted(Book myBook) {
+        Node newNode = new Node(myBook);
         if (head == null) { // If the list is empty
             head = tail = newNode;
             newNode.next = newNode.prev = newNode; // Circular link
@@ -52,33 +50,31 @@ public class BookList {
         }
     }
 
-    // Method to display the list starting from the head
-    public void display() {
-        if (head != null) {
-            Node current = head;
-            do {
-                current.book.display(); // Use the Book's display method to show details
-                current.author.displayAuthors(); // Use the AuthorList's displayAuthors method to show authors
-                current = current.next;
-            } while (current != head);
+    
+    //getBook
+    public Book getBook(String title) {
+        Node current = head;
+        while (current != null) {
+            if (current.book.getTitle().equals(title)) {
+                return current.book;
+            }
+            current = current.next;
         }
+        return null;
+    }
+
+    //convert Book to string
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        Node current = head;
+        while (current != null) {
+            sb.append(current.book.toString()).append("\n");
+            current = current.next;
+        }
+        return sb.toString();
     }
 
     public static void main(String[] args) {
-        //create authors for my book
-        Author author1 = new Author("John", "Soe");
-        Author author2 = new Author("Jane", "Dmith");
-        AuthorList authorList = new AuthorList();
-
-        //create a list of authors
-        authorList.addAuthor(author1);
-        authorList.addAuthor(author2);
-
-        //create a book
-        Book book1 = new Book("Java Programming", "plot","2020", 10, 29.99);
-        BookList list = new BookList();
-        list.insertSorted(book1, authorList);
-        list.display();
 
     }
 
