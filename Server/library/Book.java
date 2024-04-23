@@ -70,7 +70,7 @@ public class Book {
 
     //convert book to string formatted
     public String toString(){
-        return title + " " + plot + " " + year + " " + quantity + " " + price + " " + author.toString();
+        return "\n Title:" + title + "\n Plot: " + plot + "\n Release Year: " + year + "\n Quantity: " + quantity + "\nPrice: " + price + "\nAuthor(s) " + author.toString();
     }
 
     //method to display the book details

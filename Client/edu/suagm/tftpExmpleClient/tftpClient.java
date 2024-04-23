@@ -24,7 +24,7 @@ public class tftpClient {
 
 	// List of valid commmands on the protocol
 	private enum tftpValidCommands {
-		add_genre, add_book, list_genres, exit
+		add_genre, add_book, list_genres, list_books, modify_book, list_genre_books, buy_book, exit
 	}
 
 	// Current command
@@ -125,25 +125,25 @@ public class tftpClient {
 						// TODO print the instructions for inputs
 						// TODO print all the genres
 
-						String title = getUserInput("Enter the title of the book", reader);
+						String title = getUserInput("\nEnter the title of the book", reader);
 						// ask for the plot
-						String plot = getUserInput("Enter the plot of the book", reader);
-						String year = getUserInput("Enter the year of the book", reader);
-						String genre = getUserInput("Enter the genre of the book", reader);
+						String plot = getUserInput("\nEnter the plot of the book", reader);
+						String year = getUserInput("\nEnter the year of the book", reader);
+						String genre = getUserInput("\nEnter the genre of the book", reader);
 						// ask the amount of authors
-						int amountAuthors = getNumberInput("Enter the amount of authors", reader);
+						int amountAuthors = getNumberInput("\nEnter the amount of authors", reader);
 						// create a string with the authors
 						String authors = "";
 						for (int i = 0; i < amountAuthors; i++) {
-							authors += getUserInput("Enter the author " + (i + 1) + " of the book", reader);
+							authors += getUserInput("\nEnter the author " + (i + 1) + " of the book", reader);
 							if (i < amountAuthors - 1) {
 								authors += ",";
 							}
 						}
 						// ask the quantity
-						int quantity = getNumberInput("Enter the quantity of the book", reader);
+						int quantity = getNumberInput("\nEnter the quantity of the book", reader);
 						// ask the price
-						double price = Double.parseDouble(getUserInput("Enter the price of the book", reader));
+						double price = Double.parseDouble(getUserInput("\nEnter the price of the book", reader));
 
 						// create the book info
 						String bookInfo = title + "|" + genre + "|" + plot + "|" + String.join(",", authors) + "|"
@@ -163,10 +163,6 @@ public class tftpClient {
 						break;
 					case tftpCodes.LIST_BOOKS_BY_GENRE:
 						listBooksByGenreCommand();
-						break;
-
-					case tftpCodes.SEARCH_BOOK:
-						searchBookCommand();
 						break;
 
 					case tftpCodes.BUY_BOOK:
@@ -263,7 +259,6 @@ public class tftpClient {
 					System.out.println("Genre added successfully");
 				}
 
-
 			} else {
 				System.out.println("Error adding genre");
 			}
@@ -312,7 +307,56 @@ public class tftpClient {
 	}
 
 	private void modifyBookCommand() {
-		// TODO Auto-generated method stub
+
+		System.out.println("Sending command: MODIFY_BOOK");
+
+		try {
+			// Send the MODIFY_BOOK command to the server
+			socketOutputStream.writeInt(tftpCodes.MODIFY_BOOK);
+			socketOutputStream.flush();
+
+			if (socketInputStream.readInt() == tftpCodes.OK) {
+				// input the title of the book
+				String title = getUserInput("Enter the title of the book", new Scanner(System.in));
+				// send the title to the server
+				socketOutputStream.write(title.getBytes());
+				socketOutputStream.flush();
+				// wait for the server to return all the book information
+				byte[] buffer = new byte[tftpCodes.BUFFER_SIZE];
+				int read = socketInputStream.read(buffer);
+				// extract all the genres from the buffed dynamically
+				String bookInfo = new String(buffer, 0, read).trim();
+				System.out.println("Received book info from the server: ");
+				System.out.println(bookInfo);
+				// Confirm receipt of genres to the server
+				socketOutputStream.writeInt(tftpCodes.OK);
+				socketOutputStream.flush();
+
+				// ask if they are sure they want to modify it
+				String answer = getUserInput("Do you want to modify this book? (y/n)", new Scanner(System.in));
+				if (answer.equals("y")) {
+					// ask for the new info
+					String newInfo = getUserInput("Enter the new price", new Scanner(System.in));
+					newInfo += "|" + getUserInput("Enter the new quantity", new Scanner(System.in));
+					// send the new info to the server
+					socketOutputStream.write(newInfo.getBytes());
+					socketOutputStream.flush();
+					// wait for the server to return the confirmation
+					if (socketInputStream.readInt() == tftpCodes.OK) {
+						System.out.println("Book modified successfully");
+					} else {
+						System.out.println("Server did not acknowledge the MODIFY_BOOK command");
+					}
+
+				} else {
+					System.out.println("You did not choose to modify the book");
+				}
+
+			}
+		} catch (Exception e) {
+			System.out.println("An error occurred while listing genres: " + e.getMessage());
+			e.printStackTrace();
+		}
 
 	}
 
@@ -322,14 +366,14 @@ public class tftpClient {
 			// Send the LIST_GENRES command to the server
 			socketOutputStream.writeInt(tftpCodes.LIST_GENRES);
 			socketOutputStream.flush();
-			
+
 			// Read the response which contains the genres
 			byte[] buffer = new byte[tftpCodes.BUFFER_SIZE];
 			int read = socketInputStream.read(buffer);
-			//extract all the genres from the buffed dynamically
+			// extract all the genres from the buffed dynamically
 			String genres = new String(buffer, 0, tftpCodes.BUFFER_SIZE).trim();
-		
-			System.out.println("Received genres from the server: \n");
+
+			System.out.println("Received genres from the server: ");
 			System.out.println(genres);
 
 			// Confirm receipt of genres to the server
@@ -344,22 +388,122 @@ public class tftpClient {
 	}
 
 	private void listBooksCommand() {
-		// TODO Auto-generated method stub
+		// print the genre and then below all the books that belong to that genre
+		try {
+			// Send the LIST_BOOKS command to the server
+			socketOutputStream.writeInt(tftpCodes.LIST_BOOKS);
+			socketOutputStream.flush();
+
+			// read the response that constains all the genres and the books that belong to
+			// it
+			byte[] buffer = new byte[tftpCodes.BUFFER_SIZE];
+			int read = socketInputStream.read(buffer);
+			// extract all the genres from the buffed dynamically
+			String books = new String(buffer, 0, read).trim();
+
+			System.out.println("Received books from the server: \n");
+			System.out.println(books);
+
+			// Confirm receipt of genres to the server
+			socketOutputStream.writeInt(tftpCodes.OK);
+			socketOutputStream.flush();
+			System.out.println("Books received and acknowledged successfully.");
+
+		} catch (Exception e) {
+			System.out.println("An error occurred while listing genres: " + e.getMessage());
+			e.printStackTrace();
+		}
 
 	}
 
 	private void listBooksByGenreCommand() {
-		// TODO Auto-generated method stub
+		//wait for server conformation for command
+		System.out.println("Sending command: LIST_BOOKS_BY_GENRE");
 
-	}
+		try {
+			// Send the LIST_BOOKS_BY_GENRE command to the server
+			socketOutputStream.writeInt(tftpCodes.LIST_BOOKS_BY_GENRE);
+			socketOutputStream.flush();
 
-	private void searchBookCommand() {
-		// TODO Auto-generated method stub
+			// Wait for OK code
+			int read = socketInputStream.readInt();
+			if (read == tftpCodes.OK) {
+				// input the genre
+				String genre = getUserInput("Enter the genre of the book", new Scanner(System.in));
+				// send the genre to the server
+				socketOutputStream.write(genre.getBytes());
+				socketOutputStream.flush();
+				// wait for the server to return all the book information
+				byte[] buffer = new byte[tftpCodes.BUFFER_SIZE];
+				read = socketInputStream.read(buffer);
+				// extract all the genres from the buffed dynamically
+				String books = new String(buffer, 0, read).trim();
+				System.out.println("Received books from the server: ");
+				System.out.println(books);
+				// Confirm receipt of genres to the server
+				socketOutputStream.writeInt(tftpCodes.OK);
+				socketOutputStream.flush();
+				System.out.println("Books received and acknowledged successfully.");
+			} else {
+				System.out.println("Error listing books by genre");
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 	}
 
 	private void buyBookCommand() {
-		// TODO Auto-generated method stub
+		//read the title and ask for the book information, then decide if buy or not
+		System.out.println("Sending command: BUY_BOOK");
+
+		try {
+			// Send the BUY_BOOK command to the server
+			socketOutputStream.writeInt(tftpCodes.BUY_BOOK);
+			socketOutputStream.flush();
+
+			if (socketInputStream.readInt() == tftpCodes.OK) {
+				// input the title of the book
+				String title = getUserInput("Enter the title of the book", new Scanner(System.in));
+				// send the title to the server
+				socketOutputStream.write(title.getBytes());
+				socketOutputStream.flush();
+				// wait for the server to return all the book information
+				byte[] buffer = new byte[tftpCodes.BUFFER_SIZE];
+				int read = socketInputStream.read(buffer);
+				// extract all the genres from the buffed dynamically
+				String bookInfo = new String(buffer, 0, read).trim();
+				System.out.println("Received book info from the server: ");
+				System.out.println(bookInfo);
+				// Confirm receipt of genres to the server
+				socketOutputStream.writeInt(tftpCodes.OK);
+				socketOutputStream.flush();
+
+				// ask if they are sure they want to buy it
+				String answer = getUserInput("Do you want to buy this book? (y/n)", new Scanner(System.in));
+				if (answer.equals("y")) {
+					// ask for the quantity
+					int quantity = getNumberInput("Enter the quantity", new Scanner(System.in));
+					// send the quantity to the server
+					socketOutputStream.writeInt(quantity);
+					socketOutputStream.flush();
+					// wait for the server to return the confirmation
+					if (socketInputStream.readInt() == tftpCodes.OK) {
+						System.out.println("Book bought successfully");
+					} else {
+						System.out.println("Server did not acknowledge the BUY_BOOK command");
+					}
+
+				} else {
+					System.out.println("You did not choose to buy the book");
+				}
+
+			}
+		} catch (Exception e) {
+			System.out.println("An error occurred while listing genres: " + e.getMessage());
+			e.printStackTrace();
+		}
 
 	}
 
@@ -431,7 +575,7 @@ public class tftpClient {
 					break;
 
 				case add_book:
-					if (commandList.size() ==1) {
+					if (commandList.size() == 1) {
 						currentCommand = tftpCodes.ADD_BOOK;
 					} else {
 						currentCommand = tftpCodes.WRONGCOMMAND;
@@ -442,10 +586,23 @@ public class tftpClient {
 					currentCommand = tftpCodes.LIST_GENRES;
 					break;
 
+				case list_books:
+					currentCommand = tftpCodes.LIST_BOOKS;
+					break;
+
 				case exit:
 					currentCommand = tftpCodes.CLOSECONNECTION;
 					break;
 
+				case modify_book:
+					currentCommand = tftpCodes.MODIFY_BOOK;
+					break;
+				case list_genre_books:
+					currentCommand = tftpCodes.LIST_BOOKS_BY_GENRE;
+					break;
+				case buy_book:
+					currentCommand = tftpCodes.BUY_BOOK;
+					break; 
 				default:
 					currentCommand = tftpCodes.WRONGCOMMAND;
 					results = sText;
