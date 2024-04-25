@@ -34,9 +34,8 @@ public class tftpServer {
 			}
 			// Close the server socket
 			serverSocket.close();
-
 		} catch (IOException e) {
-		}finally {
+		} finally {
 			System.out.println("Server closed");
 		}
 	}

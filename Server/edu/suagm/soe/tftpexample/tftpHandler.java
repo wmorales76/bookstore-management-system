@@ -183,16 +183,16 @@ public class tftpHandler extends Thread {
 			// Wait for book info
 			System.out.println("Waiting for the book info");
 			read = clientInputStream.read(buffer);
-			String bookInfo = new String(buffer,0,read).trim();
+			String bookInfo = new String(buffer, 0, read).trim();
 			// Save current time for computing transmission time
 			// print the book info
 			System.out.println("add book \n" + bookInfo);
 
 			// add the book to the binary search tree
 			// syncronized the access to the tree
-			//String bookInfo = title + "|" + genre + "|" + plot + "|" + String.join(",", authors) + "|"
-			//+ year + "|" + price + "|" + quantity;
-			
+			// String bookInfo = title + "|" + genre + "|" + plot + "|" + String.join(",",
+			// authors) + "|"
+			// + year + "|" + price + "|" + quantity;
 
 			// Split the book info into its components
 			String[] bookInfoArray = bookInfo.split("\\|");
@@ -204,9 +204,8 @@ public class tftpHandler extends Thread {
 			double price = Double.parseDouble(bookInfoArray[5]);
 			int quantity = Integer.parseInt(bookInfoArray[6]);
 
-
-			//add book to a booklist
-			bst.addBooktoBST(genre, title, plot, authors, year,price, quantity);
+			// add book to a booklist
+			bst.addBooktoBST(genre, title, plot, authors, year, price, quantity);
 			String book = bst.getBookByTitle(title);
 			System.out.println("Book added: " + book);
 			// Send confirmation to the client
@@ -221,10 +220,10 @@ public class tftpHandler extends Thread {
 	}
 
 	private void modifyBookCommand() {
-		
+
 		System.out.println("Modify Book Command");
-		
-		//send ok to the client
+
+		// send ok to the client
 		try {
 			clientOutputStream.writeInt(tftpCodes.OK);
 			clientOutputStream.flush();
@@ -232,7 +231,7 @@ public class tftpHandler extends Thread {
 			e.printStackTrace();
 		}
 
-		//read the book title from the client
+		// read the book title from the client
 		byte[] buffer = new byte[tftpCodes.BUFFER_SIZE];
 		try {
 			int read;
@@ -240,11 +239,11 @@ public class tftpHandler extends Thread {
 			System.out.println("Waiting for the book title");
 			read = clientInputStream.read(buffer);
 			String title = new String(buffer, 0, read).trim();
-			
-			//use the method to get all the info from the book as string
+
+			// use the method to get all the info from the book as string
 			String bookInfo = getBookInfo(title);
 
-			//send the book info to the client
+			// send the book info to the client
 			clientOutputStream.write(bookInfo.getBytes());
 			clientOutputStream.flush();
 			System.out.println("Book info sent to the client.");
@@ -253,14 +252,14 @@ public class tftpHandler extends Thread {
 			int clientResponse = clientInputStream.readInt();
 			if (clientResponse == tftpCodes.OK) {
 				System.out.println("Client confirmed receipt of book info.");
-				//wait for the new book info
+				// wait for the new book info
 				read = clientInputStream.read(buffer);
 				String newBookInfo = new String(buffer, 0, read).trim();
 				// Split the book info into its components price | quantity
 				String[] bookInfoArray = newBookInfo.split("\\|");
 				double price = Double.parseDouble(bookInfoArray[0]);
 				int quantity = Integer.parseInt(bookInfoArray[1]);
-				//modify the book
+				// modify the book
 				boolean success = modifyBook(title, price, quantity);
 				if (success) {
 					System.out.println("Book modified: " + title);
@@ -278,12 +277,12 @@ public class tftpHandler extends Thread {
 			e.printStackTrace();
 		}
 
-
 	}
 
 	private synchronized String getBookInfo(String title) {
 		// Fetch the book from the binary search tree
-		String book = bst.getBookByTitle(title); // Assuming bst.getBookByTitle(title) returns a formatted string of book info
+		String book = bst.getBookByTitle(title); // Assuming bst.getBookByTitle(title) returns a formatted string of
+													// book info
 		return book;
 	}
 
@@ -295,18 +294,18 @@ public class tftpHandler extends Thread {
 
 	private synchronized void listGenresCommand() {
 		try {
-			synchronized(bst) {
+			synchronized (bst) {
 				// Fetch genres from the binary search tree and prepare to send them
 				String genres = bst.getGenres(); // Assuming bst.getGenres() returns a formatted string of genres
 				System.out.println(genres);
 				byte[] buffer = genres.getBytes();
-				
+
 				// Send the genres to the client
 				clientOutputStream.write(buffer);
 				clientOutputStream.flush();
 				System.out.println("List Genres Command: Genres sent to the client.");
 			}
-	
+
 			// Await client's confirmation that genres have been received
 			int clientResponse = clientInputStream.readInt();
 			if (clientResponse == tftpCodes.OK) {
@@ -321,21 +320,22 @@ public class tftpHandler extends Thread {
 	}
 
 	private void listBooksCommand() {
-		//get all the genres and display below each all the book that belong to that genre with all the information
+		// get all the genres and display below each all the book that belong to that
+		// genre with all the information
 
 		try {
-			synchronized(bst) {
+			synchronized (bst) {
 				// Fetch genres from the binary search tree and prepare to send them
 				String books = bst.getBooks(); // Assuming bst.getGenres() returns a formatted string of genres
 				System.out.println(books);
 				byte[] buffer = books.getBytes();
-				
+
 				// Send the genres to the client
 				clientOutputStream.write(buffer);
 				clientOutputStream.flush();
 				System.out.println("List Books Command: Books sent to the client.");
 			}
-	
+
 			// Await client's confirmation that genres have been received
 			int clientResponse = clientInputStream.readInt();
 			if (clientResponse == tftpCodes.OK) {
@@ -348,12 +348,10 @@ public class tftpHandler extends Thread {
 			e.printStackTrace();
 		}
 
-
-
 	}
 
 	private void listBooksByGenreCommand() {
-		//get the genre from the client
+		// get the genre from the client
 		byte[] buffer = new byte[tftpCodes.BUFFER_SIZE];
 		System.out.println("List Books By Genre Command");
 
@@ -367,19 +365,19 @@ public class tftpHandler extends Thread {
 			// Wait for genre name
 			System.out.println("Waiting for the genre name");
 			read = clientInputStream.read(buffer);
-			String genre = new String(buffer,0,read).trim();
+			String genre = new String(buffer, 0, read).trim();
 			// print the genre name
 			System.out.println("List books by genre " + genre);
 
 			// get all the books by genre
 			String books = getBooksByGenre(genre);
 			byte[] bufferBooks = books.getBytes();
-			
+
 			// Send the genres to the client
 			clientOutputStream.write(bufferBooks);
 			clientOutputStream.flush();
 			System.out.println("List Books By Genre Command: Books sent to the client.");
-	
+
 			// Await client's confirmation that genres have been received
 			int clientResponse = clientInputStream.readInt();
 			if (clientResponse == tftpCodes.OK) {
@@ -396,7 +394,8 @@ public class tftpHandler extends Thread {
 
 	private synchronized String getBooksByGenre(String genre) {
 		// Fetch the books from the binary search tree
-		String books = bst.getBooksByGenre(genre); // Assuming bst.getBooksByGenre(genre) returns a formatted string of books
+		String books = bst.getBooksByGenre(genre); // Assuming bst.getBooksByGenre(genre) returns a formatted string of
+													// books
 		return books;
 	}
 
@@ -406,10 +405,10 @@ public class tftpHandler extends Thread {
 	}
 
 	private void buyBookCommand() {
-		
+
 		System.out.println("Buy Book Command");
-		
-		//send ok to the client
+
+		// send ok to the client
 		try {
 			clientOutputStream.writeInt(tftpCodes.OK);
 			clientOutputStream.flush();
@@ -417,7 +416,7 @@ public class tftpHandler extends Thread {
 			e.printStackTrace();
 		}
 
-		//read the book title from the client
+		// read the book title from the client
 		byte[] buffer = new byte[tftpCodes.BUFFER_SIZE];
 		try {
 			int read;
@@ -425,11 +424,11 @@ public class tftpHandler extends Thread {
 			System.out.println("Waiting for the book title");
 			read = clientInputStream.read(buffer);
 			String title = new String(buffer, 0, read).trim();
-			
-			//use the method to get all the info from the book as string
+
+			// use the method to get all the info from the book as string
 			String bookInfo = getBookInfo(title);
 
-			//send the book info to the client
+			// send the book info to the client
 			clientOutputStream.write(bookInfo.getBytes());
 			clientOutputStream.flush();
 			System.out.println("Book info sent to the client.");
@@ -438,11 +437,11 @@ public class tftpHandler extends Thread {
 			int clientResponse = clientInputStream.readInt();
 			if (clientResponse == tftpCodes.OK) {
 				System.out.println("Client confirmed receipt of book info.");
-				//wait for the new book info
-				//read the quantity and remove from the database the amount
+				// wait for the new book info
+				// read the quantity and remove from the database the amount
 				read = clientInputStream.read(buffer);
 				int quantity = Integer.parseInt(new String(buffer, 0, read).trim());
-				//modify the book
+				// modify the book
 				boolean success = buyBook(title, quantity);
 
 				if (success) {
@@ -455,7 +454,6 @@ public class tftpHandler extends Thread {
 					System.out.println("Failed to buy book: " + title);
 				}
 
-		
 			} else {
 				System.out.println("Client failed to confirm receipt of book info.");
 			}

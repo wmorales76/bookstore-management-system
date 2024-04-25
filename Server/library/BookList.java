@@ -83,7 +83,7 @@ public class BookList {
         return sb.toString().trim(); // Trim to remove the last extra newline
     }
 
-    //modify book by title price and quantity
+    // modify book by title price and quantity
     public boolean modifyBook(String title, double price, int quantity) {
         if (head == null) { // If there are no books
             return false;
@@ -100,7 +100,7 @@ public class BookList {
         return false; // If the book is not found
     }
 
-    //method to buy a book
+    // method to buy a book
     public boolean buyBook(String title, int quantity) {
         if (head == null) { // If there are no books
             return false;
@@ -119,7 +119,6 @@ public class BookList {
         } while (current != head); // Continue until we reach the head again
         return false; // If the book is not found
     }
-
 
     // Convert BookList to a string, formatted with extra line spaces
     public String toString() {
