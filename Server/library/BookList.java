@@ -134,4 +134,18 @@ public class BookList {
         return sb.toString().trim(); // Trim to remove the last extra newline
     }
 
+    //get all books but only title, year and authors
+    public String getAllBooksShort() {
+        if (head == null) { // If there are no books
+            return "No books in the list.";
+        }
+        StringBuilder sb = new StringBuilder();
+        Node current = head;
+        do {
+            // Append book details followed by two newlines for spacing
+            sb.append(current.book.getTitle()).append(" (").append(current.book.getYear()).append(") by ").append(current.book.getAuthors()).append("\n");
+            current = current.next;
+        } while (current != head); // Continue until we reach the head again
+        return sb.toString().trim(); // Trim to remove the last extra newline
+    }
 }

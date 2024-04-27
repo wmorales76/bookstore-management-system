@@ -42,6 +42,8 @@ public class tftpCodes {
 	// empty
 	public static final int EMPTY = 13;
 
+	public static final int ERROR = 14;
+
 	// Close connection
 	public static final int CLOSECONNECTION = 15;
 

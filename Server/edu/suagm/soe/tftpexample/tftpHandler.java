@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.Socket;
 
 //import the bst
@@ -164,9 +165,39 @@ public class tftpHandler extends Thread {
 			// Write the OK code: make acknowledgment of ADD BOOK command
 			clientOutputStream.writeInt(tftpCodes.OK);
 			clientOutputStream.flush();
+			// wait for the client to ask for list of genres and send it
+			if (clientInputStream.readInt() == tftpCodes.LIST_GENRES) {
+				String genres = listGenres();
+				System.out.println(genres);
+				if ("No genres found".equals(genres)) {
+					// Send empty code
+					clientOutputStream.writeInt(tftpCodes.EMPTY);
+					clientOutputStream.flush();
+					return;
+				} else {
+					//send found
+					System.out.println("Sending found code to the client");
+					clientOutputStream.writeInt(tftpCodes.FOUND);
+					clientOutputStream.flush();	
 
+				}
+			if (clientInputStream.readInt() == tftpCodes.OK) {
+								// Send the genres to the client
+				System.out.println("Received OK code. Sending genres to the client");
+				buffer = genres.getBytes();
+				// Send the genres to the client
+				clientOutputStream.write(buffer);
+				clientOutputStream.flush();
+			}else{
+				System.out.println("Client failed to confirm receipt of genres.");
+				return;
+			}
+
+
+			}
 			// Wait for book info
 			System.out.println("Waiting for the book info");
+			buffer = new byte[tftpCodes.BUFFER_SIZE];
 			read = clientInputStream.read(buffer);
 			String bookInfo = new String(buffer, 0, read).trim();
 			// Save current time for computing transmission time
@@ -260,17 +291,16 @@ public class tftpHandler extends Thread {
 
 	private void listGenresCommand() {
 		try {
-			synchronized (bst) {
-				// Fetch genres from the binary search tree and prepare to send them
-				String genres = bst.getGenres(); // Assuming bst.getGenres() returns a formatted string of genres
-				System.out.println(genres);
-				byte[] buffer = genres.getBytes();
 
-				// Send the genres to the client
-				clientOutputStream.write(buffer);
-				clientOutputStream.flush();
-				System.out.println("List Genres Command: Genres sent to the client.");
-			}
+			// Fetch genres from the binary search tree and prepare to send them
+			String genres = listGenres(); // Assuming bst.getGenres() returns a formatted string of genres
+			System.out.println(genres);
+			byte[] buffer = genres.getBytes();
+
+			// Send the genres to the client
+			clientOutputStream.write(buffer);
+			clientOutputStream.flush();
+			System.out.println("List Genres Command: Genres sent to the client.");
 
 			// Await client's confirmation that genres have been received
 			int clientResponse = clientInputStream.readInt();
@@ -428,9 +458,8 @@ public class tftpHandler extends Thread {
 			if (clientResponse == tftpCodes.OK) {
 				System.out.println("Client confirmed receipt of book info.");
 				// wait for the new book info
-				// read the quantity and remove from the database the amount
-				read = clientInputStream.read(buffer);
-				int quantity = Integer.parseInt(new String(buffer, 0, read).trim());
+				// read the quantity and remove from the database the amount of books
+				int quantity = clientInputStream.readInt();
 				// modify the book
 				boolean success = buyBook(title, quantity);
 
@@ -458,7 +487,6 @@ public class tftpHandler extends Thread {
 	 * Tasks: Sends OK confirmation code to the client for closing connection
 	 * 
 	 **************************************************************************/
-
 	private void exitCommand() {
 		try {
 			clientOutputStream.writeInt(tftpCodes.OK);
@@ -470,6 +498,13 @@ public class tftpHandler extends Thread {
 	}
 
 	// methods that will access the tree, need to be synchronized
+	// list genres
+	private synchronized String listGenres() {
+		// Fetch genres from the binary search tree and prepare to send them
+		String genres = bst.getGenres(); // Assuming bst.getGenres() returns a formatted string of genres
+		return genres;
+	}
+
 	private synchronized boolean addGenre(String genre) {
 		// Add the genre to the binary search tree
 		bst.insertGenre(genre);
@@ -477,7 +512,8 @@ public class tftpHandler extends Thread {
 		return flag;
 	}
 
-	private synchronized boolean addBook(String genre, String title, String plot, String[] authors, String year, double price, int quantity) {
+	private synchronized boolean addBook(String genre, String title, String plot, String[] authors, String year,
+			double price, int quantity) {
 		// Add the book to the binary search tree
 		boolean flag = bst.addBooktoBST(genre, title, plot, authors, year, price, quantity);
 		return flag;

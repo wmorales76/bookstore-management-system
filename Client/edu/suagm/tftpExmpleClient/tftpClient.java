@@ -163,14 +163,14 @@ public class tftpClient {
 	// buy a book and exit
 	public void ShowMenu() {
 		System.out.println("1. Add Genre <add_genre>");
-		System.out.println("2. Add Book");
-		System.out.println("3. Modify Book");
-		System.out.println("4. List all Genres");
-		System.out.println("5. List all Books by Genre");
-		System.out.println("6. List all Books by a particular Genre");
-		System.out.println("7. Search for a Book by Title");
-		System.out.println("8. Buy a Book");
-		System.out.println("9. Exit");
+		System.out.println("2. Add Book <add_book>");
+		System.out.println("3. Modify Book <modify_book>");
+		System.out.println("4. List all Genres <list_genres>");
+		System.out.println("5. List all Books by Genre <list_books>");
+		System.out.println("6. List all Books by a particular Genre <list_genre_books>");
+		System.out.println("7. Search for a Book by Title <search_book>");
+		System.out.println("8. Buy a Book <buy_book>");
+		System.out.println("9. Exit <exit>");
 	}
 
 	/***************************************************************************
@@ -218,7 +218,7 @@ public class tftpClient {
 
 	private void addBookCommand() {
 		try {
-			String bookInfo = readBookInfo();
+
 			// Send AddBook command
 			System.out.println("Sending command: ADD_BOOK");
 			socketOutputStream.writeInt(tftpCodes.ADD_BOOK);
@@ -228,24 +228,43 @@ public class tftpClient {
 			// Wait for OK code
 			int read = socketInputStream.readInt();
 			if (read == tftpCodes.OK) {
+				// ask the server for the list of genres
+				socketOutputStream.writeInt(tftpCodes.LIST_GENRES);
+				socketOutputStream.flush();
 
+				// Read the response which contains the genres
+				byte[] buffer = new byte[tftpCodes.BUFFER_SIZE];
+				read = socketInputStream.readInt();
+				if (read == tftpCodes.EMPTY) {
+
+					System.out.println("No genres found. Insert a genre first.");
+					return;
+				}else if(read == tftpCodes.FOUND){
+					System.out.println("Genres found.");
+					//send ok
+					socketOutputStream.writeInt(tftpCodes.OK);
+					socketOutputStream.flush();
+				}
+				// extract all the genres from the buffed dynamically
+				read = socketInputStream.read(buffer);
+				String genres = new String(buffer, 0, read).trim();
+				// print the genres
+
+				String bookInfo = readBookInfo(genres);
 				// Send the book info
 				System.out.println("Sending the book info");
-				socketOutputStream.write(bookInfo.getBytes());
+				buffer = bookInfo.getBytes();
+				socketOutputStream.write(buffer);
 				socketOutputStream.flush();
 				System.out.println("Sent book info: " + bookInfo);
 
 				System.out.println("Waiting for confirmation");
 				// Wait for OK code
 				read = socketInputStream.readInt();
-				long startTime = System.currentTimeMillis();
 
 				if (read == tftpCodes.OK) {
 					System.out.println("Book added successfully");
 				}
-
-				long endTime = System.currentTimeMillis();
-				System.out.println("Book added in " + (endTime - startTime) + " ms.");
 
 			} else {
 				System.out.println("Error adding book");
@@ -614,31 +633,50 @@ public class tftpClient {
 		return results;
 	}
 
-	private String readBookInfo() {
-		// create a scanner
+	private String readBookInfo(String genres) {
 		Scanner reader = new Scanner(System.in);
-		// ask for the title
-		String title = getUserInput("\nEnter the title of the book", reader);
-		// ask for the plot
-		String plot = getUserInput("\nEnter the plot of the book", reader);
-		String year = getUserInput("\nEnter the year of the book", reader);
-		String genre = getUserInput("\nEnter the genre of the book", reader);
-		// ask the amount of authors
-		int amountAuthors = getNumberInput("\nEnter the amount of authors", reader);
-		// create a string with the authors
-		String authors = "";
-		for (int i = 0; i < amountAuthors; i++) {
-			authors += getUserInput("\nEnter the author " + (i + 1) + " of the book", reader);
-			if (i < amountAuthors - 1) {
-				authors += ",";
+
+		// Display the list of genres to the user
+		System.out.println("\nAvailable Genres:");
+		String[] genreArray = genres.split("\n");
+		for (int i = 0; i < genreArray.length; i++) {
+			System.out.println((i + 1) + ": " + genreArray[i]);
+		}
+
+		// Ensure the user selects a valid genre
+		String genre;
+		while (true) {
+			genre = getUserInput("\nChoose a genre by entering the corresponding number: ", reader);
+			int genreIndex = Integer.parseInt(genre) - 1; // Convert to zero-based index
+			if (genreIndex >= 0 && genreIndex < genreArray.length) {
+				genre = genreArray[genreIndex]; // Assign the valid genre
+				break; // Exit the loop once a valid genre is chosen
+			} else {
+				System.out.println("Invalid genre selection. Please try again.");
 			}
 		}
-		// ask the quantity
-		int quantity = getNumberInput("\nEnter the quantity of the book", reader);
-		// ask the price
-		double price = Double.parseDouble(getUserInput("\nEnter the price of the book", reader));
 
-		// create the book info
+		// Ask for the title
+		String title = getUserInput("\nEnter the title of the book: ", reader);
+		// Ask for the plot
+		String plot = getUserInput("\nEnter the plot of the book: ", reader);
+		// Ask for the year
+		String year = getUserInput("\nEnter the year of the book: ", reader);
+		// Ask for the number of authors
+		int amountAuthors = getNumberInput("\nEnter the number of authors: ", reader);
+
+		// Collect author names
+		String[] authors = new String[amountAuthors];
+		for (int i = 0; i < amountAuthors; i++) {
+			authors[i] = getUserInput("\nEnter the name of author " + (i + 1) + ": ", reader);
+		}
+
+		// Ask for the quantity
+		int quantity = getNumberInput("\nEnter the quantity of the book: ", reader);
+		// Ask for the price
+		double price = Double.parseDouble(getUserInput("\nEnter the price of the book: ", reader));
+
+		// Construct the book info string
 		String bookInfo = title + "|" + genre + "|" + plot + "|" + String.join(",", authors) + "|"
 				+ year + "|" + price + "|" + quantity;
 

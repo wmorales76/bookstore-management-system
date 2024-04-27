@@ -20,18 +20,34 @@ public class BinarySearchTree {
 
     Node root;
 
-    // Constructor to initialize an empty binary search tree
+    /**
+     * Represents a binary search tree data structure.
+     */
     public BinarySearchTree() {
         root = null;
     }
     // INSERTING OR MODIFYING METHODS
 
-    // Method to insert a new genre into the binary search tree
+    /**
+     * Inserts a new genre and its corresponding book list into the binary search
+     * tree.
+     *
+     * @param genre    the genre of the book list to be inserted
+     * @param bookList the book list to be inserted
+     */
     public void insert(String genre, BookList bookList) {
         root = insertRec(root, genre, bookList);
     }
 
-    // Recursive method to insert a new genre into the binary search tree
+    /**
+     * Recursively inserts a new genre and its corresponding book list into the
+     * binary search tree.
+     *
+     * @param root     the root node of the binary search tree
+     * @param genre    the genre of the book list to be inserted
+     * @param bookList the book list to be inserted
+     * @return the root node of the binary search tree
+     */
     public Node insertRec(Node root, String genre, BookList bookList) {
         // If the tree is empty, create a new node as the root
         if (root == null) {
@@ -57,12 +73,23 @@ public class BinarySearchTree {
         return root;
     }
 
-    // insert a genre only
+    /**
+     * Inserts a new genre into the binary search tree.
+     * 
+     * @param genre the genre to be inserted
+     * @return void
+     */
     public void insertGenre(String genre) {
         root = insertGenreRec(root, genre);
     }
 
-    // Recursive method to insert a new genre into the binary search tree
+    /**
+     * Recursively inserts a new genre into the binary search tree.
+     * 
+     * @param root  the root node of the binary search tree
+     * @param genre the genre to be inserted
+     * @return the root node of the binary search tree
+     */
     public Node insertGenreRec(Node root, String genre) {
         // If the tree is empty, create a new node as the root
         if (root == null) {
@@ -82,6 +109,18 @@ public class BinarySearchTree {
         return root;
     }
 
+    /**
+     * Adds a new book to the binary search tree.
+     *
+     * @param genre    the genre of the book to be added
+     * @param title    the title of the book to be added
+     * @param plot     the plot of the book to be added
+     * @param authors  the authors of the book to be added
+     * @param year     the year of the book to be added
+     * @param price    the price of the book to be added
+     * @param quantity the quantity of the book to be added
+     * @return true if the book is successfully added, false otherwise
+     */
     public boolean addBooktoBST(String genre, String title, String plot, String[] authors, String year, double price,
             int quantity) {
         AuthorList authorList = new AuthorList();
@@ -101,7 +140,11 @@ public class BinarySearchTree {
             insert(genre, bookList);
             result = true;
         } else {
-            // If the genre already exists, add the book to the existing book list
+            // If the genre already exists, create a new book list if it doesn't exist
+            // avoid null pointer exception
+            if (genreNode.bookList == null) {
+                genreNode.bookList = new BookList();
+            }
             genreNode.bookList.insertSorted(newBook);
             result = true;
         }
@@ -109,33 +152,67 @@ public class BinarySearchTree {
         return result;
     }
 
-    // modify book by title, price and quantity
+    /**
+     * Modifies a book by title, price, and quantity in the binary search tree.
+     * 
+     * @param title    the title of the book to be modified
+     * @param price    the new price of the book
+     * @param quantity the new quantity of the book
+     * @return true if the book is successfully modified, false otherwise
+     */
     public boolean modifyBook(String title, double price, int quantity) {
         return modifyBookRec(root, title, price, quantity);
     }
 
-    // Recursive method to modify a book by title, price, and quantity
-    public boolean modifyBookRec(Node root, String title, double price, int quantity) {
-        if (root != null) {
-            if (root.bookList.modifyBook(title, price, quantity)) {
-                return true;
-            }
-            if (modifyBookRec(root.left, title, price, quantity)) {
-                return true;
-            }
-            if (modifyBookRec(root.right, title, price, quantity)) {
-                return true;
-            }
+    /**
+     * Recursively modifies a book by title, price, and quantity in the binary
+     * search tree.
+     * 
+     * @param root     the root node of the binary search tree
+     * @param title    the title of the book to be modified
+     * @param price    the new price of the book
+     * @param quantity the new quantity of the book
+     * @return true if the book is successfully modified, false otherwise
+     */
+    private boolean modifyBookRec(Node root, String title, double price, int quantity) {
+        if (root == null) {
+            return false;
         }
-        return false;
+
+        // Try to modify the book in the current node
+        if (root.bookList != null && root.bookList.modifyBook(title, price, quantity)) {
+            return true;
+        }
+
+        // Recursively modify left subtree, and if found and modified, no need to
+        // proceed further
+        if (modifyBookRec(root.left, title, price, quantity)) {
+            return true;
+        }
+
+        // Recursively modify right subtree
+        return modifyBookRec(root.right, title, price, quantity);
     }
 
-    // buy a book, simply modify the quantity, price stays the same as it was before
+    /**
+     * Buys a book by title and quantity in the binary search tree.
+     * 
+     * @param title    the title of the book to be bought
+     * @param quantity the quantity of the book to be bought
+     * @return true if the book is successfully bought, false otherwise
+     */
     public boolean buyBook(String title, int quantity) {
         return buyBookRec(root, title, quantity);
     }
 
-    // Recursive method to buy a book by title and quantity
+    /**
+     * Recursively buys a book by title and quantity in the binary search tree.
+     * 
+     * @param root     the root node of the binary search tree
+     * @param title    the title of the book to be bought
+     * @param quantity the quantity of the book to be bought
+     * @return true if the book is successfully bought, false otherwise
+     */
     public boolean buyBookRec(Node root, String title, int quantity) {
         if (root != null) {
             if (root.bookList.buyBook(title, quantity)) {
@@ -152,12 +229,24 @@ public class BinarySearchTree {
     }
 
     // METHODS TO RETRIEVE INFORMATION FROM THE TREE
-    // chec if a genre exist, return true
+
+    /**
+     * Checks if a genre exists in the binary search tree.
+     * 
+     * @param genre the genre to be checked
+     * @return true if the genre exists, false otherwise
+     */
     public boolean checkGenre(String genre) {
         return checkGenreRec(root, genre);
     }
 
-    // Recursive method to check if a genre exists in the binary search tree
+    /**
+     * Recursively checks if a genre exists in the binary search tree.
+     * 
+     * @param root  the root node of the binary search tree
+     * @param genre the genre to be checked
+     * @return true if the genre exists, false otherwise
+     */
     public boolean checkGenreRec(Node root, String genre) {
         if (root != null) {
             if (root.genre.equals(genre)) {
@@ -173,7 +262,11 @@ public class BinarySearchTree {
         return false;
     }
 
-    // get genres only
+    /**
+     * Gets all genres in the binary search tree.
+     * 
+     * @return a string containing all genres in the binary search tree
+     */
     public String getGenres() {
         if (root == null) {
             return "No genres found";
@@ -181,18 +274,28 @@ public class BinarySearchTree {
         return getGenresRec(root);
     }
 
-    // Recursive method to get genres from the binary search tree
+    /**
+     * Recursively gets all genres from the binary search tree.
+     * 
+     * @param root the root node of the binary search tree
+     * @return a string containing all genres in the binary search tree, one genre per line
+     */
     public String getGenresRec(Node root) {
-        String genres = "";
+        StringBuilder genres = new StringBuilder();
         if (root != null) {
-            genres += getGenresRec(root.left); // Traverse left subtree
-            genres += root.genre + " "; // Add current node's genre
-            genres += getGenresRec(root.right); // Traverse right subtree
+            genres.append(getGenresRec(root.left)); // Traverse left subtree
+            genres.append(root.genre).append("\n"); // Add current node's genre
+            genres.append(getGenresRec(root.right)); // Traverse right subtree
         }
-        return genres;
+        return genres.toString();
     }
-
-    // Method to search for a genre in the binary search tree
+    /**
+     * Searches for a genre in the binary search tree.
+     * 
+     * @param root  the root node of the binary search tree
+     * @param genre the genre to be searched
+     * @return the node containing the genre if found, null otherwise
+     */
     public Node search(Node root, String genre) {
         // If the tree is empty or the root node has the desired genre, return root
         if (root == null || root.genre.equals(genre)) {
@@ -208,43 +311,77 @@ public class BinarySearchTree {
 
     }
 
-    // get all books
+    /**
+     * Gets all books in the binary search tree.
+     * 
+     * @return a string containing all books in the binary search tree
+     */
     public String getBooks() {
         if (root == null) {
-            return "No books found";
+            return "No books found.";
         }
-        return getBooksRec(root);
-
+        StringBuilder result = new StringBuilder();
+        getBooksRec(root, result);
+        return result.toString();
     }
 
-    // Recursive method to get all books from the binary search tree
-    public String getBooksRec(Node root) {
-        String books = "";
+    /**
+     * Recursively gets all books from the binary search tree.
+     * 
+     * @param root   the root node of the binary search tree
+     * @param result the string builder to store the result
+     */
+    private void getBooksRec(Node root, StringBuilder result) {
         if (root != null) {
-            books += getBooksRec(root.left); // Traverse left subtree
-            books += "\n\n" + root.genre + ":\n"; // Add current node's genre
-            books += root.bookList.getAllBooks(); // Add current node's book list
-            books += getBooksRec(root.right); // Traverse right subtree
+            getBooksRec(root.left, result); // Traverse left subtree
+            result.append("\n\n").append("========================================"); // Add dividing lane
+            result.append("\n").append(root.genre).append(":\n"); // Add current node's genre
+            if (root.bookList != null && root.bookList.getAllBooks() != null) {
+                result.append(root.bookList.getAllBooks()); // Add current node's book list
+            } else {
+                result.append("No books for this genre yet"); // Add "No books in the list" if book list is null
+            }
+            result.append("\n").append("========================================"); // Add dividing lane
+            getBooksRec(root.right, result); // Traverse right subtree
         }
-        return books;
     }
-
-    // get books by genre
+    /**
+     * Gets all books in a specific genre from the binary search tree.
+     * 
+     * @param genre the genre of the books to be retrieved
+     * @return a string containing all books in the specified genre
+     */
     public String getBooksByGenre(String genre) {
         Node genreNode = search(root, genre);
-        if (genreNode == null) {
+        if (genreNode != null) {
+            if (genreNode.bookList != null) {
+                return genreNode.bookList.getAllBooksShort();
+            } else {
+                return "No books found.";
+
+            }
+        } else {
             return "Genre not found.";
         }
-        return genreNode.bookList.getAllBooks();
-
     }
 
-    // Get book by title
+    /**
+     * Gets a book by title from the binary search tree.
+     * 
+     * @param title the title of the book to be retrieved
+     * @return a string containing the book with the specified title
+     */
     public String getBookByTitle(String title) {
         return getBookByTitleRec(root, title);
     }
 
-    // Recursive method to get a book by title from the binary search tree
+    /**
+     * Recursively gets a book by title from the binary search tree.
+     * 
+     * @param root  the root node of the binary search tree
+     * @param title the title of the book to be retrieved
+     * @return a string containing the book with the specified title
+     */
     public String getBookByTitleRec(Node root, String title) {
         // Check if the current node is null
         if (root == null) {

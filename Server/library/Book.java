@@ -35,7 +35,10 @@ public class Book {
     public int getQuantity(){
         return quantity;
     }
-
+    //get authors
+    public AuthorList getAuthors(){
+        return author;
+    }
     //set title
     public void setTitle(String title){
         this.title = title;
@@ -70,7 +73,7 @@ public class Book {
 
     //convert book to string formatted
     public String toString(){
-        return "\n Title:" + title + "\n Plot: " + plot + "\n Release Year: " + year + "\n Quantity: " + quantity + "\nPrice: " + price + "\nAuthor(s) " + author.toString();
+        return "\n\nTitle:" + title + "\nPlot: " + plot + "\nRelease Year: " + year + "\nQuantity: " + quantity + "\nPrice: " + price + "\nAuthor(s) " + author.toString() + "\n";
     }
 
     //method to display the book details
