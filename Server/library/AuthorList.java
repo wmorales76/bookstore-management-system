@@ -1,26 +1,43 @@
 package library;
 
+/**
+ * The AuthorList class represents a linked list of authors.
+ * It provides methods to add authors to the list in sorted order by last name,
+ * display all authors in the list, and convert the list to a string representation.
+ */
 public class AuthorList {
     private AuthorNode head; // Head node of the linked list
 
-    // Nested private class for list nodes
+    /**
+     * Represents a node in the linked list of authors.
+     */
     private class AuthorNode {
         Author author; // The author object stored in this node
         AuthorNode next; // Reference to the next node in the list
 
-        // Node constructor
+        /**
+         * Constructs a new instance of the AuthorNode class with the specified author.
+         * 
+         * @param author The author object to be stored in this node.
+         */
         public AuthorNode(Author author) {
             this.author = author;
             this.next = null;
         }
     }
 
-    // Constructor for AuthorList
+    /**
+     * Constructs a new instance of the AuthorList class with an empty list.
+     */
     public AuthorList() {
         this.head = null;
     }
 
-    // Method to add an author to the list in sorted order by last name
+    /**
+     * Adds a new author to the list in sorted order by last name.
+     * 
+     * @param author The author to be added to the list.
+     */
     public void addAuthor(Author author) {
         AuthorNode newNode = new AuthorNode(author);
         if (head == null || author.getLastName().compareTo(head.author.getLastName()) < 0) {
@@ -39,7 +56,9 @@ public class AuthorList {
         }
     }
 
-    // Method to display all authors in the list
+    /**
+     * Displays all authors in the list.
+     */
     public void displayAuthors() {
         AuthorNode current = head;
         while (current != null) {
@@ -54,7 +73,11 @@ public class AuthorList {
 
     }
 
-    //convert all authors in node to string
+    /**
+     * Returns a string representation of the list of authors.
+     * 
+     * @return A string representation of the list of authors.
+     */
     public String toString(){
         String authors = "";
         AuthorNode current = head;

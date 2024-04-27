@@ -11,6 +11,8 @@ import java.util.LinkedList;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 
+import javax.swing.plaf.synth.SynthStyle;
+
 /**************************************************************************
  * 
  * @author Idalides Vergara
@@ -239,9 +241,9 @@ public class tftpClient {
 
 					System.out.println("No genres found. Insert a genre first.");
 					return;
-				}else if(read == tftpCodes.FOUND){
+				} else if (read == tftpCodes.FOUND) {
 					System.out.println("Genres found.");
-					//send ok
+					// send ok
 					socketOutputStream.writeInt(tftpCodes.OK);
 					socketOutputStream.flush();
 				}
@@ -285,11 +287,13 @@ public class tftpClient {
 			socketOutputStream.flush();
 
 			if (socketInputStream.readInt() == tftpCodes.OK) {
+
 				// input the title of the book
 				String title = getUserInput("Enter the title of the book", new Scanner(System.in));
 				// send the title to the server
 				socketOutputStream.write(title.getBytes());
 				socketOutputStream.flush();
+
 				// wait for the server to return all the book information
 				byte[] buffer = new byte[tftpCodes.BUFFER_SIZE];
 				int read = socketInputStream.read(buffer);
@@ -297,28 +301,32 @@ public class tftpClient {
 				String bookInfo = new String(buffer, 0, read).trim();
 				System.out.println("Received book info from the server: ");
 				System.out.println(bookInfo);
-				// Confirm receipt of genres to the server
-				socketOutputStream.writeInt(tftpCodes.OK);
-				socketOutputStream.flush();
 
 				// ask if they are sure they want to modify it
 				String answer = getUserInput("Do you want to modify this book? (y/n)", new Scanner(System.in));
 				if (answer.equals("y")) {
-					// ask for the new info
-					String newInfo = getUserInput("Enter the new price", new Scanner(System.in));
-					newInfo += "|" + getUserInput("Enter the new quantity", new Scanner(System.in));
-					// send the new info to the server
-					socketOutputStream.write(newInfo.getBytes());
+					socketOutputStream.writeInt(tftpCodes.OK);
 					socketOutputStream.flush();
-					// wait for the server to return the confirmation
 					if (socketInputStream.readInt() == tftpCodes.OK) {
-						System.out.println("Book modified successfully");
-					} else {
-						System.out.println("Server did not acknowledge the MODIFY_BOOK command");
-					}
 
+						// ask for the new info
+						String newInfo = getUserInput("Enter the new price", new Scanner(System.in));
+						newInfo += "|" + getUserInput("Enter the new quantity", new Scanner(System.in));
+						// send the new info to the server
+						socketOutputStream.write(newInfo.getBytes());
+						socketOutputStream.flush();
+
+						// wait for the server to return the confirmation
+						if (socketInputStream.readInt() == tftpCodes.OK) {
+							System.out.println("Book modified successfully");
+						} else if (socketInputStream.readInt() == tftpCodes.ERROR) {
+							System.out.println("Error modifying book");
+						}
+					}
 				} else {
 					System.out.println("You did not choose to modify the book");
+					socketOutputStream.writeInt(tftpCodes.ERROR);
+					socketOutputStream.flush();
 				}
 
 			}
@@ -350,7 +358,9 @@ public class tftpClient {
 				// extract all the genres from the buffed dynamically
 				String bookInfo = new String(buffer, 0, read).trim();
 				System.out.println("Received book info from the server: ");
+				System.out.println("=============================");
 				System.out.println(bookInfo);
+				System.out.println("=============================");
 				// Confirm receipt of genres to the server
 				socketOutputStream.writeInt(tftpCodes.OK);
 				socketOutputStream.flush();
@@ -377,13 +387,13 @@ public class tftpClient {
 			// extract all the genres from the buffed dynamically
 			String genres = new String(buffer, 0, tftpCodes.BUFFER_SIZE).trim();
 
-			System.out.println("Received genres from the server: ");
+			System.out.println("Received genres from the server: \n");
 			System.out.println(genres);
 
 			// Confirm receipt of genres to the server
 			socketOutputStream.writeInt(tftpCodes.OK);
 			socketOutputStream.flush();
-			System.out.println("Genres received and acknowledged successfully.");
+			System.out.println("\nGenres received and acknowledged successfully.");
 
 		} catch (Exception e) {
 			System.out.println("An error occurred while listing genres: " + e.getMessage());
@@ -411,7 +421,7 @@ public class tftpClient {
 			// Confirm receipt of genres to the server
 			socketOutputStream.writeInt(tftpCodes.OK);
 			socketOutputStream.flush();
-			System.out.println("Books received and acknowledged successfully.");
+			System.out.println("\nBooks received and acknowledged successfully.");
 
 		} catch (Exception e) {
 			System.out.println("An error occurred while listing genres: " + e.getMessage());
@@ -433,7 +443,7 @@ public class tftpClient {
 			int read = socketInputStream.readInt();
 			if (read == tftpCodes.OK) {
 				// input the genre
-				String genre = getUserInput("Enter the genre of the book", new Scanner(System.in));
+				String genre = getUserInput("Enter the genre of the book\n", new Scanner(System.in));
 				// send the genre to the server
 				socketOutputStream.write(genre.getBytes());
 				socketOutputStream.flush();
@@ -442,12 +452,14 @@ public class tftpClient {
 				read = socketInputStream.read(buffer);
 				// extract all the genres from the buffed dynamically
 				String books = new String(buffer, 0, read).trim();
-				System.out.println("Received books from the server: ");
+				System.out.println("Received books from the server:\n");
+				System.out.println("=============================");
 				System.out.println(books);
+				System.out.println("=============================");
 				// Confirm receipt of genres to the server
 				socketOutputStream.writeInt(tftpCodes.OK);
 				socketOutputStream.flush();
-				System.out.println("Books received and acknowledged successfully.");
+				System.out.println("\nBooks received and acknowledged successfully.");
 			} else {
 				System.out.println("Error listing books by genre");
 			}
@@ -468,11 +480,13 @@ public class tftpClient {
 			socketOutputStream.flush();
 
 			if (socketInputStream.readInt() == tftpCodes.OK) {
+
 				// input the title of the book
 				String title = getUserInput("Enter the title of the book", new Scanner(System.in));
 				// send the title to the server
 				socketOutputStream.write(title.getBytes());
 				socketOutputStream.flush();
+
 				// wait for the server to return all the book information
 				byte[] buffer = new byte[tftpCodes.BUFFER_SIZE];
 				int read = socketInputStream.read(buffer);
@@ -480,27 +494,35 @@ public class tftpClient {
 				String bookInfo = new String(buffer, 0, read).trim();
 				System.out.println("Received book info from the server: ");
 				System.out.println(bookInfo);
+
 				// Confirm receipt of genres to the server
 				socketOutputStream.writeInt(tftpCodes.OK);
 				socketOutputStream.flush();
 
-				// ask if they are sure they want to buy it
-				String answer = getUserInput("Do you want to buy this book? (y/n)", new Scanner(System.in));
-				if (answer.equals("y")) {
-					// ask for the quantity
-					int quantity = getNumberInput("Enter the quantity", new Scanner(System.in));
-					// send the quantity to the server
-					socketOutputStream.writeInt(quantity);
-					socketOutputStream.flush();
-					// wait for the server to return the confirmation
-					if (socketInputStream.readInt() == tftpCodes.OK) {
-						System.out.println("Book bought successfully");
+				// wait for ok from the server
+				if (socketInputStream.readInt() == tftpCodes.OK) {
+					System.out.println("System is ready to buy the book.");
+
+					// ask if they are sure they want to buy it
+					String answer = getUserInput("Do you want to buy this book? (y/n)", new Scanner(System.in));
+					if (answer.equals("y")) {
+						// send the quantity to the server
+						socketOutputStream.writeInt(tftpCodes.OK);
+						socketOutputStream.flush();
+
+						if (tftpCodes.OK == socketInputStream.readInt()) {
+							System.out.println("Book bought successfully");
+						} else {
+							System.out.println("Server did not acknowledge the BUY_BOOK command");
+
+						}
+
 					} else {
-						System.out.println("Server did not acknowledge the BUY_BOOK command");
+						System.out.println("You did not choose to buy the book");
+						socketOutputStream.writeInt(tftpCodes.ERROR);
+						socketOutputStream.flush();
 					}
 
-				} else {
-					System.out.println("You did not choose to buy the book");
 				}
 
 			}

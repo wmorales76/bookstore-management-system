@@ -10,8 +10,17 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+/**
+ * The tftpServer class represents a TFTP server that listens for client connections and handles data transfer.
+ */
 public class tftpServer {
 
+	/**
+	 * The main method of the tftpServer class.
+	 * It creates a server socket, waits for client connections, and handles data transfer for each client.
+	 *
+	 * @param args the command line arguments. The first argument should be the port number to listen on.
+	 */
 	public static void main(String[] args) {
 		int port = (new Integer(args[0])).intValue();
 		boolean running = true;
