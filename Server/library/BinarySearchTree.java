@@ -1,7 +1,5 @@
 package library;
 
-import java.util.Scanner;
-
 public class BinarySearchTree {
 
     private class Node {
@@ -247,7 +245,7 @@ public class BinarySearchTree {
      * @param genre the genre to be checked
      * @return true if the genre exists, false otherwise
      */
-    public boolean checkGenreRec(Node root, String genre) {
+    private boolean checkGenreRec(Node root, String genre) {
         if (root != null) {
             if (root.genre.equals(genre)) {
                 return true;

@@ -1,7 +1,5 @@
 package library;
 
-import library.*;
-
 /**
  * The BookList class represents a circular doubly linked list of books.
  * It provides methods to insert, modify, buy, and retrieve books from the list.
