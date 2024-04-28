@@ -1,5 +1,11 @@
 package edu.suagm.soe.tftpexample;
 
+/**
+ * The {@code tftpCodes} class represents the codes used in a TFTP (Trivial File Transfer Protocol) system.
+ * It provides constants for various data transfer operations such as adding genres, adding books, modifying books,
+ * listing genres, listing books, listing books by genre, searching books, buying books, and more.
+ * These codes are used to communicate between the client and server in the TFTP system.
+ */
 public class tftpCodes {
 
 	// Buffer size
@@ -41,6 +47,8 @@ public class tftpCodes {
 
 	// empty
 	public static final int EMPTY = 13;
+
+	public static final int ERROR = 14;
 
 	// Close connection
 	public static final int CLOSECONNECTION = 15;

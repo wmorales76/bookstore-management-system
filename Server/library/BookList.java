@@ -1,28 +1,47 @@
 package library;
 
-import library.*;
-
+/**
+ * The BookList class represents a circular doubly linked list of books.
+ * It provides methods to insert, modify, buy, and retrieve books from the list.
+ */
 public class BookList {
     private Node head;
     private Node tail;
 
-    // constructor
+    
+    
+    /**
+     * Constructs a new instance of the BookList class with an empty list.
+     */
     public BookList() {
         head = null;
         tail = null;
     }
 
+    /**
+     * Represents a node in the circular doubly linked list of books.
+     */
     private class Node {
         Book book;
         Node prev;
         Node next;
 
+        /**
+         * Constructs a new instance of the Node class with the specified book.
+         * 
+         * @param book The book object to be stored in this node.
+         */
         public Node(Book book) {
             this.book = book;
         }
     }
 
-    // Method to insert a new book in sorted order based on the title
+    
+    /**
+     * Adds a new book to the list in sorted order by title.
+     * 
+     * @param myBook The book to be added to the list.
+     */
     public void insertSorted(Book myBook) {
         Node newNode = new Node(myBook);
         if (head == null) { // If the list is empty
@@ -52,38 +71,15 @@ public class BookList {
         }
     }
 
-    // getBook info in a string for a specific book
-    public String getBook(String title) {
-        if (head == null) { // If there are no books
-            return "No books in the list.";
-        }
-        Node current = head;
-        do {
-            if (current.book.getTitle().equals(title)) { // If the title matches
-                return current.book.toString(); // Return the book info
-            }
-            current = current.next;
-        } while (current != head); // Continue until we reach the head again
-        return "Book not found."; // If the book is not found
-    }
-
-    // Get all book info in a string for all books in the list, formatted with extra
-    // line spaces
-    public String getAllBooks() {
-        if (head == null) { // If there are no books
-            return "No books in the list.";
-        }
-        StringBuilder sb = new StringBuilder();
-        Node current = head;
-        do {
-            // Append book details followed by two newlines for spacing
-            sb.append(current.book.toString()).append("\n");
-            current = current.next;
-        } while (current != head); // Continue until we reach the head again
-        return sb.toString().trim(); // Trim to remove the last extra newline
-    }
-
-    // modify book by title price and quantity
+    
+    /**
+     * Modifies the price and quantity of a book in the list.
+     * 
+     * @param title    The title of the book to be modified.
+     * @param price    The new price of the book.
+     * @param quantity The new quantity of the book.
+     * @return true if the book is found and modified, false otherwise.
+     */
     public boolean modifyBook(String title, double price, int quantity) {
         if (head == null) { // If there are no books
             return false;
@@ -100,7 +96,14 @@ public class BookList {
         return false; // If the book is not found
     }
 
-    // method to buy a book
+    
+    /**
+     * Buys a specified quantity of a book from the list.
+     * 
+     * @param title    The title of the book to be bought.
+     * @param quantity The quantity of the book to be bought.
+     * @return true if the book is found and bought, false otherwise.
+     */
     public boolean buyBook(String title, int quantity) {
         if (head == null) { // If there are no books
             return false;
@@ -120,7 +123,53 @@ public class BookList {
         return false; // If the book is not found
     }
 
-    // Convert BookList to a string, formatted with extra line spaces
+    
+    /**
+     * Retrieves the details of a book from the list.
+     * 
+     * @param title The title of the book to be retrieved.
+     * @return the details of the book if found, "Book not found." otherwise.
+     */
+    public String getBook(String title) {
+        if (head == null) { // If there are no books
+            return "No books in the list.";
+        }
+        Node current = head;
+        do {
+            if (current.book.getTitle().equals(title)) { // If the title matches
+                return current.book.toString(); // Return the book info
+            }
+            current = current.next;
+        } while (current != head); // Continue until we reach the head again
+        return "Book not found."; // If the book is not found
+    }
+
+    
+    /**
+     * Retrieves the details of all books from the list.
+     * 
+     * @return the details of all books in the list.
+     */
+    public String getAllBooks() {
+        if (head == null) { // If there are no books
+            return "No books in the list.";
+        }
+        StringBuilder sb = new StringBuilder();
+        Node current = head;
+        do {
+            // Append book details followed by two newlines for spacing
+            sb.append(current.book.toString()).append("\n");
+            current = current.next;
+        } while (current != head); // Continue until we reach the head again
+        return sb.toString().trim(); // Trim to remove the last extra newline
+    }
+
+    
+    /**
+     * Retrieves the details of all books from the list.
+     * 
+     * @return the details of all books in the list.
+     */
     public String toString() {
         if (head == null) { // If there are no books
             return "No books in the list.";
@@ -135,22 +184,23 @@ public class BookList {
         return sb.toString().trim(); // Trim to remove the last extra newline
     }
 
-    public static void main(String[] args) {
-
-        // create author list
-        AuthorList al = new AuthorList();
-        al.addAuthor(new Author("F. Scott", "Fitzgerald"));
-        al.addAuthor(new Author("Harper", "Lee"));
-
-        // test the get all books method
-        BookList bl = new BookList();
-        bl.insertSorted(new Book("The Great Gatsby", "F. Scott Fitzgerald", "Classic", 1925, 7.99, al));
-        bl.insertSorted(new Book("To Kill a Mockingbird", "Harper Lee", "Classic", 1960, 6.99, al));
-        bl.insertSorted(new Book("1984", "George Orwell", "Dystopian", 1949, 8.99, al));
-        bl.insertSorted(new Book("Brave New World", "Aldous Huxley", "Dystopian", 1932, 9.99, al));
-
-        System.out.println(bl.getAllBooks());
-
+    
+    /**
+     * Retrieves the details of all books from the list in a short format.
+     * 
+     * @return the details of all books in the list in a short format.
+     */
+    public String getAllBooksShort() {
+        if (head == null) { // If there are no books
+            return "No books in the list.";
+        }
+        StringBuilder sb = new StringBuilder();
+        Node current = head;
+        do {
+            // Append book details followed by two newlines for spacing
+            sb.append(current.book.getTitle()).append(" (").append(current.book.getYear()).append(") by ").append(current.book.getAuthors()).append("\n");
+            current = current.next;
+        } while (current != head); // Continue until we reach the head again
+        return sb.toString().trim(); // Trim to remove the last extra newline
     }
-
 }
