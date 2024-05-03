@@ -435,7 +435,6 @@ public class tftpHandler extends Thread {
 			// get all the books by genre
 			String books = getBooksByGenre(genre);
 			byte[] bufferBooks = books.getBytes();
-
 			// Send the genres to the client
 			clientOutputStream.write(bufferBooks);
 			clientOutputStream.flush();

@@ -573,9 +573,9 @@ public class tftpClient {
 
 		// Verify the command
 		try {
-			switch (tftpValidCommands.valueOf(commandList.get(0))) {
+			switch (Integer.parseInt(commandList.get(0))) {
 				// Get command
-				case add_genre:
+				case 1:
 					if (commandList.size() == 1) {
 						currentCommand = tftpCodes.ADD_GENRE;
 					} else {
@@ -583,61 +583,61 @@ public class tftpClient {
 					}
 					break;
 
-				case add_book:
+				case 2:
 					if (commandList.size() == 1) {
 						currentCommand = tftpCodes.ADD_BOOK;
 					} else {
 						currentCommand = tftpCodes.WRONGCOMMAND;
 					}
 					break;
-				case list_genres:
-					if (commandList.size() == 1) {
-						currentCommand = tftpCodes.LIST_GENRES;
-					} else {
-						currentCommand = tftpCodes.WRONGCOMMAND;
-					}
-					break;
-
-				case list_books:
-					if (commandList.size() == 1) {
-						currentCommand = tftpCodes.LIST_BOOKS;
-					} else {
-						currentCommand = tftpCodes.WRONGCOMMAND;
-					}
-					break;
-				case search_book:
-					if (commandList.size() == 1) {
-						currentCommand = tftpCodes.SEARCH_BOOK;
-					} else {
-						currentCommand = tftpCodes.WRONGCOMMAND;
-					}
-					break;
-
-				case exit:
-					if (commandList.size() == 1) {
-						currentCommand = tftpCodes.CLOSECONNECTION;
-					} else {
-						currentCommand = tftpCodes.WRONGCOMMAND;
-					}
-					break;
-
-				case modify_book:
+				case 3:
 					if (commandList.size() == 1) {
 						currentCommand = tftpCodes.MODIFY_BOOK;
 					} else {
 						currentCommand = tftpCodes.WRONGCOMMAND;
 					}
 					break;
-				case list_genre_books:
+
+				case 4:
+					if (commandList.size() == 1) {
+						currentCommand = tftpCodes.LIST_GENRES;
+					} else {
+						currentCommand = tftpCodes.WRONGCOMMAND;
+					}
+					break;
+				case 5:
+					if (commandList.size() == 1) {
+						currentCommand = tftpCodes.LIST_BOOKS;
+					} else {
+						currentCommand = tftpCodes.WRONGCOMMAND;
+					}
+					break;
+
+				case 6:
 					if (commandList.size() == 1) {
 						currentCommand = tftpCodes.LIST_BOOKS_BY_GENRE;
 					} else {
 						currentCommand = tftpCodes.WRONGCOMMAND;
 					}
 					break;
-				case buy_book:
+
+				case 7:
+					if (commandList.size() == 1) {
+						currentCommand = tftpCodes.SEARCH_BOOK;
+					} else {
+						currentCommand = tftpCodes.WRONGCOMMAND;
+					}
+					break;
+				case 8:
 					if (commandList.size() == 1) {
 						currentCommand = tftpCodes.BUY_BOOK;
+					} else {
+						currentCommand = tftpCodes.WRONGCOMMAND;
+					}
+					break;
+				case 9:
+					if (commandList.size() == 1) {
+						currentCommand = tftpCodes.CLOSECONNECTION;
 					} else {
 						currentCommand = tftpCodes.WRONGCOMMAND;
 					}
