@@ -213,7 +213,7 @@ public class BinarySearchTree {
      */
     public boolean buyBookRec(Node root, String title, int quantity) {
         if (root != null) {
-            if (root.bookList.buyBook(title, quantity)) {
+            if (root.bookList != null && root.bookList.buyBook(title, quantity)) {
                 return true;
             }
             if (buyBookRec(root.left, title, quantity)) {
@@ -383,9 +383,8 @@ public class BinarySearchTree {
     public String getBookByTitleRec(Node root, String title) {
         // Check if the current node is null
         if (root == null) {
-            return "Book not found.";
+            return "The tree is empty";
         }
-
         // Check if the book list at the current node is not null
         if (root.bookList != null) {
             String book = root.bookList.getBook(title);
@@ -406,7 +405,6 @@ public class BinarySearchTree {
         if (rightBook != null && !rightBook.equals("Book not found.")) {
             return rightBook;
         }
-
         // If the book is not found in any nodes, return "Book not found."
         return "Book not found.";
     }
