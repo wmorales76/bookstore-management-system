@@ -127,7 +127,7 @@ public class tftpHandler extends Thread {
 	private void addGenreCommand() {
 		// Read the genre from the client
 		byte[] buffer = new byte[tftpCodes.BUFFER_SIZE];
-		int totalRead = 0;
+		//int totalRead = 0;
 	
 		System.out.println("Add Genre Command");
 	
@@ -145,9 +145,10 @@ public class tftpHandler extends Thread {
 	
 			// Wait for genre name
 			System.out.println("Waiting for the genre name");
+			String genre = "";
 			try {
 				read = clientInputStream.read(buffer);
-				String genre = new String(buffer).trim();
+				genre = new String(buffer).trim();
 				// print the genre name
 				System.out.println("add genre " + genre);
 			} catch (IOException e) {
