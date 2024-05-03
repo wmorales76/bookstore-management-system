@@ -127,13 +127,13 @@ public class tftpHandler extends Thread {
 	private void addGenreCommand() {
 		// Read the genre from the client
 		byte[] buffer = new byte[tftpCodes.BUFFER_SIZE];
-		//int totalRead = 0;
-	
+		// int totalRead = 0;
+
 		System.out.println("Add Genre Command");
-	
+
 		try {
 			int read;
-	
+
 			// Write the OK code: make acknowledgment of ADD GENRE command
 			try {
 				clientOutputStream.writeInt(tftpCodes.OK);
@@ -142,7 +142,7 @@ public class tftpHandler extends Thread {
 				System.out.println("Error writing ACK to client.");
 				e.printStackTrace();
 			}
-	
+
 			// Wait for genre name
 			System.out.println("Waiting for the genre name");
 			String genre = "";
@@ -155,12 +155,12 @@ public class tftpHandler extends Thread {
 				System.out.println("Error reading genre name from client.");
 				e.printStackTrace();
 			}
-	
+
 			// Add the genre to the binary search tree
 			// Synchronized access to the tree
 			boolean genreAdded = addGenre(genre);
 			System.out.println("Genre added: " + genre);
-	
+
 			// Send confirmation to the client
 			try {
 				clientOutputStream.writeInt(tftpCodes.OK);
@@ -170,13 +170,12 @@ public class tftpHandler extends Thread {
 				System.out.println("Error sending confirmation to client.");
 				e.printStackTrace();
 			}
-	
+
 		} catch (Exception e) {
 			System.out.println("An error occurred in addGenreCommand.");
 			e.printStackTrace();
 		}
 	}
-	
 
 	/**
 	 * Receives book information from the client and adds the book to the booklist.
@@ -188,10 +187,10 @@ public class tftpHandler extends Thread {
 		// Receive the book info from the client
 		byte[] buffer = new byte[tftpCodes.BUFFER_SIZE];
 		System.out.println("Add Book Command");
-	
+
 		try {
 			int read;
-	
+
 			// Acknowledge ADD BOOK command
 			try {
 				clientOutputStream.writeInt(tftpCodes.OK);
@@ -200,13 +199,13 @@ public class tftpHandler extends Thread {
 				System.out.println("Error sending ACK for ADD BOOK.");
 				e.printStackTrace();
 			}
-	
+
 			// Wait for the client to ask for list of genres and send it
 			try {
 				if (clientInputStream.readInt() == tftpCodes.LIST_GENRES) {
 					String genres = listGenres();
 					System.out.println(genres);
-	
+
 					if ("No genres found".equals(genres)) {
 						clientOutputStream.writeInt(tftpCodes.EMPTY);
 						clientOutputStream.flush();
@@ -216,7 +215,7 @@ public class tftpHandler extends Thread {
 						clientOutputStream.writeInt(tftpCodes.FOUND);
 						clientOutputStream.flush();
 					}
-	
+
 					if (clientInputStream.readInt() == tftpCodes.OK) {
 						System.out.println("Received OK code. Sending genres to the client");
 						buffer = genres.getBytes();
@@ -231,14 +230,14 @@ public class tftpHandler extends Thread {
 				System.out.println("Error communicating list of genres.");
 				e.printStackTrace();
 			}
-	
+
 			// Wait for and process book info
 			System.out.println("Waiting for the book info");
 			buffer = new byte[tftpCodes.BUFFER_SIZE];
 			read = clientInputStream.read(buffer);
 			String bookInfo = new String(buffer, 0, read).trim();
 			System.out.println("add book \n" + bookInfo);
-	
+
 			// Parse and add book information
 			try {
 				String[] bookInfoArray = bookInfo.split("\\|");
@@ -249,7 +248,7 @@ public class tftpHandler extends Thread {
 				String year = bookInfoArray[4];
 				double price = Double.parseDouble(bookInfoArray[5]);
 				int quantity = Integer.parseInt(bookInfoArray[6]);
-	
+
 				boolean bookAdded = addBook(genre, title, plot, authors, year, price, quantity);
 				String book = getBookInfo(title);
 				System.out.println("Book added: " + book);
@@ -257,7 +256,7 @@ public class tftpHandler extends Thread {
 				System.out.println("Error parsing book information.");
 				e.printStackTrace();
 			}
-	
+
 			// Send final confirmation
 			try {
 				clientOutputStream.writeInt(tftpCodes.OK);
@@ -272,7 +271,6 @@ public class tftpHandler extends Thread {
 			e.printStackTrace();
 		}
 	}
-	
 
 	/**
 	 * Modifies a book based on the client's request.
@@ -284,7 +282,7 @@ public class tftpHandler extends Thread {
 	 */
 	private void modifyBookCommand() {
 		System.out.println("Modify Book Command");
-	
+
 		// Send OK to the client to acknowledge the command
 		try {
 			clientOutputStream.writeInt(tftpCodes.OK);
@@ -293,17 +291,17 @@ public class tftpHandler extends Thread {
 			System.out.println("Error sending OK to client.");
 			e.printStackTrace();
 		}
-	
+
 		byte[] buffer = new byte[tftpCodes.BUFFER_SIZE];
 		try {
 			// Wait for book title from the client
 			System.out.println("Waiting for the book title");
 			int read = clientInputStream.read(buffer);
 			String title = new String(buffer, 0, read).trim();
-	
+
 			// Use the method to get all the info from the book as string
 			String bookInfo = getBookInfo(title);
-			
+
 			// Send the book info to the client
 			try {
 				clientOutputStream.write(bookInfo.getBytes());
@@ -313,7 +311,7 @@ public class tftpHandler extends Thread {
 				System.out.println("Error sending book information to client.");
 				e.printStackTrace();
 			}
-	
+
 			// Await client's confirmation that book info has been received
 			int clientResponse = clientInputStream.readInt();
 			if (clientResponse == tftpCodes.OK) {
@@ -322,17 +320,17 @@ public class tftpHandler extends Thread {
 					// Server is ready to receive the new book info
 					clientOutputStream.writeInt(tftpCodes.OK);
 					clientOutputStream.flush();
-	
+
 					// Wait for the new book info
 					read = clientInputStream.read(buffer);
 					String newBookInfo = new String(buffer, 0, read).trim();
-	
+
 					// Parse the new book info: price | quantity
 					try {
 						String[] bookInfoArray = newBookInfo.split("\\|");
 						double price = Double.parseDouble(bookInfoArray[0]);
 						int quantity = Integer.parseInt(bookInfoArray[1]);
-	
+
 						// Modify the book
 						boolean success = modifyBook(title, price, quantity);
 						if (success) {
@@ -356,7 +354,7 @@ public class tftpHandler extends Thread {
 			} else if (clientResponse == tftpCodes.ERROR) {
 				System.out.println("Client does not want to modify the book.");
 			}
-	
+
 		} catch (IOException e) {
 			System.out.println("Error reading from client stream.");
 			e.printStackTrace();
@@ -365,7 +363,6 @@ public class tftpHandler extends Thread {
 			e.printStackTrace();
 		}
 	}
-	
 
 	/**
 	 * Sends a list of genres to the client.
@@ -394,9 +391,9 @@ public class tftpHandler extends Thread {
 				e.printStackTrace();
 				return; // Stop further execution if genres can't be fetched
 			}
-	
+
 			byte[] buffer = genres.getBytes();
-	
+
 			// Send the genres to the client
 			try {
 				clientOutputStream.write(buffer);
@@ -407,7 +404,7 @@ public class tftpHandler extends Thread {
 				e.printStackTrace();
 				return; // Stop further execution if send fails
 			}
-	
+
 			// Await client's confirmation that genres have been received
 			try {
 				int clientResponse = clientInputStream.readInt();
@@ -425,7 +422,6 @@ public class tftpHandler extends Thread {
 			e.printStackTrace();
 		}
 	}
-	
 
 	/**
 	 * Sends a list of books to the client.
@@ -438,7 +434,8 @@ public class tftpHandler extends Thread {
 	 *                     client.
 	 */
 	private void listBooksCommand() {
-		// Get all the genres and display below each all the books that belong to that genre with all the information
+		// Get all the genres and display below each all the books that belong to that
+		// genre with all the information
 		try {
 			String books;
 			try {
@@ -450,9 +447,9 @@ public class tftpHandler extends Thread {
 				e.printStackTrace();
 				return; // Stop further execution if books can't be fetched
 			}
-	
+
 			byte[] buffer = books.getBytes();
-	
+
 			// Send the books to the client
 			try {
 				clientOutputStream.write(buffer);
@@ -463,7 +460,7 @@ public class tftpHandler extends Thread {
 				e.printStackTrace();
 				return; // Stop further execution if send fails
 			}
-	
+
 			// Await client's confirmation that books have been received
 			try {
 				int clientResponse = clientInputStream.readInt();
@@ -481,7 +478,6 @@ public class tftpHandler extends Thread {
 			e.printStackTrace();
 		}
 	}
-	
 
 	/**
 	 * Retrieves and sends a list of books to the client based on the specified
@@ -494,72 +490,71 @@ public class tftpHandler extends Thread {
 	 * @throws IOException if an I/O error occurs while reading from or writing to
 	 *                     the client
 	 */
-private void listBooksByGenreCommand() {
-    byte[] buffer = new byte[tftpCodes.BUFFER_SIZE];
-    System.out.println("List Books By Genre Command");
+	private void listBooksByGenreCommand() {
+		byte[] buffer = new byte[tftpCodes.BUFFER_SIZE];
+		System.out.println("List Books By Genre Command");
 
-    try {
-        int read;
+		try {
+			int read;
 
-        // Acknowledge the client's request
-        try {
-            clientOutputStream.writeInt(tftpCodes.OK);
-            clientOutputStream.flush();
-        } catch (IOException e) {
-            System.err.println("Error sending OK to client.");
-            e.printStackTrace();
-            return; // If we cannot send the OK, no point in continuing
-        }
+			// Acknowledge the client's request
+			try {
+				clientOutputStream.writeInt(tftpCodes.OK);
+				clientOutputStream.flush();
+			} catch (IOException e) {
+				System.err.println("Error sending OK to client.");
+				e.printStackTrace();
+				return; // If we cannot send the OK, no point in continuing
+			}
 
-        // Wait for the genre name from the client
-        try {
-            System.out.println("Waiting for the genre name");
-            read = clientInputStream.read(buffer);
-            if (read == -1) {
-                System.out.println("Client closed the connection unexpectedly.");
-                return;
-            }
-        } catch (IOException e) {
-            System.err.println("Error reading genre name from client.");
-            e.printStackTrace();
-            return; // If we can't read the genre, no point in continuing
-        }
+			// Wait for the genre name from the client
+			try {
+				System.out.println("Waiting for the genre name");
+				read = clientInputStream.read(buffer);
+				if (read == -1) {
+					System.out.println("Client closed the connection unexpectedly.");
+					return;
+				}
+			} catch (IOException e) {
+				System.err.println("Error reading genre name from client.");
+				e.printStackTrace();
+				return; // If we can't read the genre, no point in continuing
+			}
 
-        String genre = new String(buffer, 0, read).trim();
-        System.out.println("List books by genre " + genre);
+			String genre = new String(buffer, 0, read).trim();
+			System.out.println("List books by genre " + genre);
 
-        String books = getBooksByGenre(genre); // Get all the books by genre
-        byte[] bufferBooks = books.getBytes();
+			String books = getBooksByGenre(genre); // Get all the books by genre
+			byte[] bufferBooks = books.getBytes();
 
-        // Send the books to the client
-        try {
-            clientOutputStream.write(bufferBooks);
-            clientOutputStream.flush();
-            System.out.println("List Books By Genre Command: Books sent to the client.");
-        } catch (IOException e) {
-            System.err.println("Error sending books to client.");
-            e.printStackTrace();
-            return; // If sending fails, no point in continuing
-        }
+			// Send the books to the client
+			try {
+				clientOutputStream.write(bufferBooks);
+				clientOutputStream.flush();
+				System.out.println("List Books By Genre Command: Books sent to the client.");
+			} catch (IOException e) {
+				System.err.println("Error sending books to client.");
+				e.printStackTrace();
+				return; // If sending fails, no point in continuing
+			}
 
-        // Await client's confirmation that books have been received
-        try {
-            int clientResponse = clientInputStream.readInt();
-            if (clientResponse == tftpCodes.OK) {
-                System.out.println("Client confirmed receipt of books.");
-            } else {
-                System.out.println("Client failed to confirm receipt of books.");
-            }
-        } catch (IOException e) {
-            System.err.println("Error receiving confirmation from client.");
-            e.printStackTrace();
-        }
-    } catch (Exception e) {
-        System.err.println("Unexpected error during listBooksByGenreCommand: " + e.getMessage());
-        e.printStackTrace();
-    }
-}
-
+			// Await client's confirmation that books have been received
+			try {
+				int clientResponse = clientInputStream.readInt();
+				if (clientResponse == tftpCodes.OK) {
+					System.out.println("Client confirmed receipt of books.");
+				} else {
+					System.out.println("Client failed to confirm receipt of books.");
+				}
+			} catch (IOException e) {
+				System.err.println("Error receiving confirmation from client.");
+				e.printStackTrace();
+			}
+		} catch (Exception e) {
+			System.err.println("Unexpected error during listBooksByGenreCommand: " + e.getMessage());
+			e.printStackTrace();
+		}
+	}
 
 	/**
 	 * Executes the search book command.
@@ -574,7 +569,7 @@ private void listBooksByGenreCommand() {
 	 */
 	private void searchBookCommand() {
 		System.out.println("Search Book Command");
-	
+
 		try {
 			// Send OK to the client as an acknowledgment
 			try {
@@ -585,10 +580,10 @@ private void listBooksByGenreCommand() {
 				e.printStackTrace();
 				return; // Early exit if unable to communicate with the client
 			}
-	
+
 			byte[] buffer = new byte[tftpCodes.BUFFER_SIZE];
 			int read;
-	
+
 			// Wait for the book title from the client
 			try {
 				System.out.println("Waiting for the book title");
@@ -602,10 +597,10 @@ private void listBooksByGenreCommand() {
 				e.printStackTrace();
 				return; // Early exit if unable to read from the client
 			}
-	
+
 			String title = new String(buffer, 0, read).trim();
-			String bookInfo = getBookInfo(title);  // Fetch book info based on title
-	
+			String bookInfo = getBookInfo(title); // Fetch book info based on title
+
 			// Send the book info to the client
 			try {
 				clientOutputStream.write(bookInfo.getBytes());
@@ -616,7 +611,7 @@ private void listBooksByGenreCommand() {
 				e.printStackTrace();
 				return; // Early exit if unable to send data to the client
 			}
-	
+
 			// Await client's confirmation that book info has been received
 			try {
 				int clientResponse = clientInputStream.readInt();
@@ -634,7 +629,6 @@ private void listBooksByGenreCommand() {
 			e.printStackTrace();
 		}
 	}
-	
 
 	/**
 	 * Executes the "Buy Book" command.
@@ -649,7 +643,7 @@ private void listBooksByGenreCommand() {
 	 */
 	private void buyBookCommand() {
 		System.out.println("Buy Book Command");
-	
+
 		// Send OK to the client to acknowledge the command
 		try {
 			clientOutputStream.writeInt(tftpCodes.OK);
@@ -659,7 +653,7 @@ private void listBooksByGenreCommand() {
 			e.printStackTrace();
 			return; // If the initial acknowledgment fails, there's no point in proceeding
 		}
-	
+
 		byte[] buffer = new byte[tftpCodes.BUFFER_SIZE];
 		try {
 			int read;
@@ -670,10 +664,10 @@ private void listBooksByGenreCommand() {
 				System.out.println("Connection closed unexpectedly by client.");
 				return;
 			}
-	
+
 			String title = new String(buffer, 0, read).trim();
 			String bookInfo = getBookInfo(title);
-	
+
 			// Send the book info to the client
 			try {
 				clientOutputStream.write(bookInfo.getBytes());
@@ -684,7 +678,7 @@ private void listBooksByGenreCommand() {
 				e.printStackTrace();
 				return;
 			}
-	
+
 			// Await client's confirmation that book info has been received
 			int clientResponse;
 			try {
@@ -694,10 +688,13 @@ private void listBooksByGenreCommand() {
 				e.printStackTrace();
 				return;
 			}
-	
+
 			if (clientResponse == tftpCodes.OK) {
 				System.out.println("Client confirmed receipt of book info.");
-	
+				// send ok
+				clientOutputStream.writeInt(tftpCodes.OK);
+				clientOutputStream.flush();
+
 				// Process the buying of the book
 				try {
 					if (clientInputStream.readInt() == tftpCodes.OK) {
@@ -722,7 +719,7 @@ private void listBooksByGenreCommand() {
 			} else {
 				System.out.println("Client failed to confirm receipt of book info.");
 			}
-	
+
 		} catch (IOException e) {
 			System.err.println("Error in book purchasing process.");
 			e.printStackTrace();
@@ -731,7 +728,6 @@ private void listBooksByGenreCommand() {
 			e.printStackTrace();
 		}
 	}
-	
 
 	/***************************************************************************
 	 * exitCommand Method
