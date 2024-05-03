@@ -698,6 +698,7 @@ public class tftpHandler extends Thread {
 				// Process the buying of the book
 				try {
 					if (clientInputStream.readInt() == tftpCodes.OK) {
+						System.out.println("Client confirmed purchase intent.\t\t\t" + title);
 						boolean success = buyBook(title);
 						if (success) {
 							System.out.println("Book bought: " + title);
