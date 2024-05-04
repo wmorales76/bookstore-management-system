@@ -132,14 +132,15 @@ public class BinarySearchTree {
         Node genreNode = search(root, genre);
         boolean result;
         if (genreNode == null) {
+            // System.out.println("Genre '" + genre + "' not found, creating new genre.");
             // Create a new BookList and add the book to it if the genre does not exist
             BookList bookList = new BookList();
             bookList.insertSorted(newBook);
             insert(genre, bookList);
             result = true;
         } else {
+            // System.out.println("Adding book to existing genre '" + genre + "'.");
             // If the genre already exists, create a new book list if it doesn't exist
-            // avoid null pointer exception
             if (genreNode.bookList == null) {
                 genreNode.bookList = new BookList();
             }
@@ -212,18 +213,27 @@ public class BinarySearchTree {
      * @return true if the book is successfully bought, false otherwise
      */
     public boolean buyBookRec(Node root, String title, int quantity) {
-        if (root != null) {
-            if (root.bookList != null && root.bookList.buyBook(title, quantity)) {
-                return true;
-            }
-            if (buyBookRec(root.left, title, quantity)) {
-                return true;
-            }
-            if (buyBookRec(root.right, title, quantity)) {
-                return true;
-            }
+        if (root == null) {
+            // System.out.println("Reached a null node, book not found.");
+            return false;
         }
-        return false;
+
+        // System.out.println("Checking books in genre: " + root.genre);
+        if (root.bookList != null && root.bookList.buyBook(title, quantity)) {
+            // System.out.println("Book purchased in " + root.genre + ": " + title);
+            return true; // Book found and quantity updated, no need to search further
+        }
+
+        // Recursively search in the left subtree first
+        boolean leftResult = buyBookRec(root.left, title, quantity);
+        if (leftResult) {
+            return true; // Book found and bought in the left subtree, stop searching
+        }
+
+        // Only search the right subtree if the book was not found in the left subtree
+        // System.out.println("Book not found or not enough quantity in " + root.genre +
+        // " and left subtree, searching right.");
+        return buyBookRec(root.right, title, quantity);
     }
 
     // METHODS TO RETRIEVE INFORMATION FROM THE TREE
@@ -276,7 +286,8 @@ public class BinarySearchTree {
      * Recursively gets all genres from the binary search tree.
      * 
      * @param root the root node of the binary search tree
-     * @return a string containing all genres in the binary search tree, one genre per line
+     * @return a string containing all genres in the binary search tree, one genre
+     *         per line
      */
     public String getGenresRec(Node root) {
         StringBuilder genres = new StringBuilder();
@@ -287,6 +298,7 @@ public class BinarySearchTree {
         }
         return genres.toString();
     }
+
     /**
      * Searches for a genre in the binary search tree.
      * 
@@ -295,18 +307,26 @@ public class BinarySearchTree {
      * @return the node containing the genre if found, null otherwise
      */
     public Node search(Node root, String genre) {
-        // If the tree is empty or the root node has the desired genre, return root
-        if (root == null || root.genre.equals(genre)) {
+        if (root == null) {
+            // System.out.println("Search - Genre '" + genre + "' not found, reached a null
+            // node.");
+            return null;
+        }
+        // System.out.println("Searching at Genre: '" + root.genre + "'");
+        if (genre.equals(root.genre)) {
+            // System.out.println("Search - Genre '" + genre + "' found.");
             return root;
         }
 
-        // If the desired genre comes before the root genre, search in the left subtree
         if (genre.compareTo(root.genre) < 0) {
+            // System.out.println("Genre '" + genre + "' is less than '" + root.genre + "',
+            // searching left.");
             return search(root.left, genre);
-        } else { // Otherwise, search in the right subtree
+        } else {
+            // System.out.println("Genre '" + genre + "' is greater than '" + root.genre +
+            // "', searching right.");
             return search(root.right, genre);
         }
-
     }
 
     /**
@@ -343,6 +363,7 @@ public class BinarySearchTree {
             getBooksRec(root.right, result); // Traverse right subtree
         }
     }
+
     /**
      * Gets all books in a specific genre from the binary search tree.
      * 
@@ -381,31 +402,24 @@ public class BinarySearchTree {
      * @return a string containing the book with the specified title
      */
     public String getBookByTitleRec(Node root, String title) {
-        // Check if the current node is null
         if (root == null) {
-            return "The tree is empty";
-        }
-        // Check if the book list at the current node is not null
-        if (root.bookList != null) {
-            String book = root.bookList.getBook(title);
-            // If the book is found at the current node, return it
-            if (book != null) {
-                return book;
-            }
+            return "Book not found.";
         }
 
-        // Recurse on the left child
-        String leftBook = getBookByTitleRec(root.left, title);
-        if (leftBook != null && !leftBook.equals("Book not found.")) {
-            return leftBook;
+        // System.out.println("Checking books in genre: " + root.genre);
+        if (root.bookList != null && !root.bookList.getBook(title).equals("Book not found.")) {
+            // System.out.println("Book found in " + root.genre + ": " + title);
+            return root.bookList.getBook(title);
         }
 
-        // Recurse on the right child
-        String rightBook = getBookByTitleRec(root.right, title);
-        if (rightBook != null && !rightBook.equals("Book not found.")) {
-            return rightBook;
+        // System.out.println("Book not found in " + root.genre + ", searching left.");
+        String leftResult = getBookByTitleRec(root.left, title);
+        if (!leftResult.equals("Book not found.")) {
+            return leftResult;
         }
-        // If the book is not found in any nodes, return "Book not found."
-        return "Book not found.";
+
+        // System.out.println("Book not found in " + root.genre + ", searching right.");
+        return getBookByTitleRec(root.right, title);
     }
+
 }
