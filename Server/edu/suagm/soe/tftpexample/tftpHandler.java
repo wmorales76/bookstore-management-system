@@ -452,7 +452,8 @@ public class tftpHandler extends Thread {
 				return; // Stop further execution if books can't be fetched
 			}
 
-			byte[] buffer = books.getBytes();
+			byte[] buffer = new byte[tftpCodes.BUFFER_SIZE];
+			buffer = books.getBytes();
 
 			// Send the books to the client
 			try {
@@ -850,8 +851,7 @@ public class tftpHandler extends Thread {
 	 */
 	private synchronized String getBooksByGenre(String genre) {
 		// Fetch the books from the binary search tree
-		String books = bst.getBooksByGenre(genre); // Assuming bst.getBooksByGenre(genre) returns a formatted string of
-													// books
+		String books = bst.getBooksByGenre(genre); // Assuming bst.getBooksByGenre(genre) returns a formatted string of									// books
 		return books;
 	}
 }

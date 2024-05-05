@@ -16,6 +16,7 @@ import javax.swing.plaf.synth.SynthStyle;
 /**************************************************************************
  * 
  * @author Idalides Vergara
+ * 		   Wilfredo Morales
  *         CPEN 457 - Programming Languages
  *         This class is the Trivial FTP client
  *         Fall 2017
@@ -160,10 +161,10 @@ public class tftpClient {
 		}
 	}
 
-	// create the menu for add genre, add book, modify book, list all genres,
-	// list all books by genre, list all books by a particular genre, search for a
-	// book by title
-	// buy a book and exit
+	/*
+	 * ShowMenu Method
+	 * This method shows the menu for the user to select the command to execute
+	 */
 	public void ShowMenu() {
 		System.out.println("1. Add Genre");
 		System.out.println("2. Add Book");
@@ -176,14 +177,16 @@ public class tftpClient {
 		System.out.println("9. Exit");
 	}
 
-	/***************************************************************************
-	 * addGenreCommand Method
-	 * Tasks: Sends the ADD_GENRE to the server
-	 * Waits for OK confirmation code from the server
-	 * Sends the genre to the server
-	 * Waits for OK confirmation code from the server
+
+	/**
+	 * Adds a genre to the bookstore management system.
 	 * 
-	 **************************************************************************/
+	 * This method prompts the user to enter a genre and sends the "ADD_GENRE" command to the server.
+	 * If the server responds with an "OK" code, the genre is sent to the server for addition.
+	 * If the server confirms the addition with another "OK" code, the genre is added successfully.
+	 * 
+	 * @throws IOException if an I/O error occurs while communicating with the server.
+	 */
 	private void addGenreCommand() {
 		try {
 			String genre = getUserInput("Enter the genre:\n", new Scanner(System.in));
@@ -219,6 +222,13 @@ public class tftpClient {
 		}
 	}
 
+
+	/**
+	 * Sends a command to add a book to the server.
+	 * This method sends the ADD_BOOK command to the server and waits for the OK code.
+	 * If the OK code is received, it asks the server for the list of genres and sends the book information.
+	 * Finally, it waits for the confirmation code and prints a success message if the book was added successfully.
+	 */
 	private void addBookCommand() {
 		try {
 
@@ -278,6 +288,11 @@ public class tftpClient {
 		}
 	}
 
+
+
+	/**
+	 * Modifies a book in the bookstore management system.
+	 */
 	private void modifyBookCommand() {
 
 		System.out.println("Sending command: MODIFY_BOOK");
@@ -342,6 +357,14 @@ public class tftpClient {
 
 	}
 
+
+
+	/**
+	 * Sends a SEARCH_BOOK command to the server, prompts the user to enter the title of the book,
+	 * sends the title to the server, and receives and displays the book information returned by the server.
+	 * 
+	 * @throws IOException if an I/O error occurs while communicating with the server
+	 */
 	private void searchBookCommand() {
 		System.out.println("Sending command: SEARCH_BOOK");
 		try {
@@ -379,6 +402,13 @@ public class tftpClient {
 		}
 	}
 
+
+	/**
+	 * Sends the LIST_GENRES command to the server, receives the genres from the server,
+	 * and acknowledges the receipt of genres.
+	 * 
+	 * @throws IOException if an I/O error occurs while communicating with the server
+	 */
 	private void listGenresCommand() {
 		System.out.println("Sending command: LIST_GENRES");
 		try {
@@ -406,6 +436,14 @@ public class tftpClient {
 		}
 	}
 
+
+	/**
+	 * Sends a command to the server to list all the books and their genres.
+	 * Prints the genres and the books that belong to each genre.
+	 * Confirms receipt of genres to the server.
+	 * 
+	 * @throws IOException if an I/O error occurs while communicating with the server.
+	 */
 	private void listBooksCommand() {
 		// print the genre and then below all the books that belong to that genre
 		try {
@@ -435,6 +473,17 @@ public class tftpClient {
 
 	}
 
+
+	/**
+	 * Sends a command to the server to list books by genre and displays the received books.
+	 * 
+	 * This method sends the LIST_BOOKS_BY_GENRE command to the server and waits for the server's confirmation.
+	 * It then prompts the user to enter the genre of the book and sends it to the server.
+	 * The server returns all the book information for the specified genre, which is then displayed to the user.
+	 * Finally, it confirms the receipt of the books to the server.
+	 * 
+	 * @throws IOException if an I/O error occurs while communicating with the server
+	 */
 	private void listBooksByGenreCommand() {
 		// wait for server conformation for command
 		System.out.println("Sending command: LIST_BOOKS_BY_GENRE");
@@ -475,6 +524,14 @@ public class tftpClient {
 
 	}
 
+
+
+	/**
+	 * Sends a command to buy a book to the server.
+	 * Asks for the book information and decides whether to buy the book or not.
+	 * 
+	 * @throws IOException if an I/O error occurs while communicating with the server.
+	 */
 	private void buyBookCommand() {
 		// read the title and ask for the book information, then decide if buy or not
 		System.out.println("Sending command: BUY_BOOK");
@@ -538,12 +595,11 @@ public class tftpClient {
 
 	}
 
-	/***************************************************************************
-	 * exitCommand Method
-	 * Tasks: Sends the CLOSECONNECTION to the server for closing the connection
-	 * Waits for OK confirmation code from the server
-	 * 
-	 **************************************************************************/
+
+	/**
+	 * Sends a CloseConnection command to the server and waits for an OK code.
+	 * Prints "Goodbye!" to the console upon successful completion.
+	 */
 	private void exitCommand() {
 		try {
 			// Send CloseConnection command
@@ -559,6 +615,14 @@ public class tftpClient {
 		}
 	}
 
+
+
+	/**
+	 * Reads the user's input commands and processes them.
+	 * 
+	 * @param reader the Scanner object used to read user input
+	 * @return a String representing the results of the command processing
+	 */
 	private String readCommands(Scanner reader) {
 		// Print the prompt
 		System.out.print(">");
@@ -660,6 +724,13 @@ public class tftpClient {
 		return results;
 	}
 
+
+	/**
+	 * Prompts the user to enter information about a book and returns the book info as a string.
+	 *
+	 * @param genres the list of genres available
+	 * @return the book information as a string
+	 */
 	private String readBookInfo(String genres) {
 		Scanner reader = new Scanner(System.in);
 
@@ -699,13 +770,15 @@ public class tftpClient {
 		// Collect author names
 		String[] authors = new String[amountAuthors];
 		for (int i = 0; i < amountAuthors; i++) {
-			authors[i] = getUserInput("\nEnter the name of author " + (i + 1) + ": ", reader);
+			String firstName = getUserInput("\nEnter the first name of author " + (i + 1) + ": ", reader);
+			String lastName = getUserInput("Enter the last name of author " + (i + 1) + ": ", reader);
+			authors[i] = firstName + " " + lastName;
 		}
 
 		// Ask for the quantity
 		int quantity = getNumberInput("\nEnter the quantity of the book: ", reader);
 		// Ask for the price
-		double price = getNumberInput("\nEnter the price of the book: ", reader);
+		double price = getDoubleInput("\nEnter the price of the book: ", reader);
 
 		// Construct the book info string
 		String bookInfo = title + "|" + genre + "|" + plot + "|" + String.join(",", authors) + "|"
@@ -714,7 +787,13 @@ public class tftpClient {
 		return bookInfo;
 	}
 
-	// check if the string is a number
+
+	/**
+	 * Checks if a given string is numeric.
+	 *
+	 * @param str the string to be checked
+	 * @return true if the string is numeric, false otherwise
+	 */
 	private boolean isNumeric(String str) {
 		try {
 			Double.parseDouble(str);
@@ -724,7 +803,15 @@ public class tftpClient {
 		}
 	}
 
-	// get user input
+	
+	/**
+		* Prompts the user for input and returns the entered value as a string.
+		* If the user enters an empty value, it will prompt again until a non-empty value is entered.
+		*
+		* @param prompt the message to display as a prompt for user input
+		* @param reader the Scanner object used to read user input
+		* @return the user's input as a string
+		*/
 	private static String getUserInput(String prompt, Scanner reader) {
 		System.out.print(prompt);
 		String input = reader.nextLine();
@@ -736,7 +823,13 @@ public class tftpClient {
 		return input;
 	}
 
-	// get a number input
+	/**
+	 * Prompts the user for a number input and returns the input as an integer.
+	 * 
+	 * @param prompt the message to display as a prompt for the user
+	 * @param reader the Scanner object used to read user input
+	 * @return the user's input as an integer
+	 */
 	private int getNumberInput(String prompt, Scanner reader) {
 		System.out.print(prompt);
 		String input = reader.nextLine();
@@ -748,6 +841,13 @@ public class tftpClient {
 		return Integer.parseInt(input);
 	}
 
+	/**
+	 * Prompts the user for a double input and returns the input as a double value.
+	 * 
+	 * @param prompt the message to display as a prompt for the user
+	 * @param reader the Scanner object used to read user input
+	 * @return the double value entered by the user
+	 */
 	private double getDoubleInput(String prompt, Scanner reader) {
 		System.out.print(prompt);
 		String input = reader.nextLine();
