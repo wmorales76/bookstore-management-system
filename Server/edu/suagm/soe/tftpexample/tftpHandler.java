@@ -306,6 +306,10 @@ public class tftpHandler extends Thread {
 			try {
 				clientOutputStream.write(bookInfo.getBytes());
 				clientOutputStream.flush();
+				if (bookInfo.equals("Book not found")) {
+					System.out.println("Book not found. Ending modifyBookCommand.");
+					return;
+				}
 				System.out.println("Book info sent to the client.");
 			} catch (IOException e) {
 				System.out.println("Error sending book information to client.");
@@ -698,7 +702,7 @@ public class tftpHandler extends Thread {
 				// Process the buying of the book
 				try {
 					if (clientInputStream.readInt() == tftpCodes.OK) {
-						System.out.println("Client confirmed purchase intent.\t\t\t" + title);
+						System.out.println("Client confirmed purchase intent.");
 						boolean success = buyBook(title);
 						if (success) {
 							System.out.println("Book bought: " + title);
