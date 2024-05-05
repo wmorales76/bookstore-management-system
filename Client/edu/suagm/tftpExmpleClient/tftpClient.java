@@ -96,8 +96,9 @@ public class tftpClient {
 			socketOutputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
 			System.out.println("Connected to the server");
 			// Show the menu
-			ShowMenu();
+
 			do {
+				ShowMenu();
 				// Read next command
 				arguments = readCommands(reader);
 
@@ -164,15 +165,15 @@ public class tftpClient {
 	// book by title
 	// buy a book and exit
 	public void ShowMenu() {
-		System.out.println("1. Add Genre <add_genre>");
-		System.out.println("2. Add Book <add_book>");
-		System.out.println("3. Modify Book <modify_book>");
-		System.out.println("4. List all Genres <list_genres>");
-		System.out.println("5. List all Books by Genre <list_books>");
-		System.out.println("6. List all Books by a particular Genre <list_genre_books>");
-		System.out.println("7. Search for a Book by Title <search_book>");
-		System.out.println("8. Buy a Book <buy_book>");
-		System.out.println("9. Exit <exit>");
+		System.out.println("1. Add Genre");
+		System.out.println("2. Add Book");
+		System.out.println("3. Modify Book");
+		System.out.println("4. List all Genres");
+		System.out.println("5. List all Books by Genre");
+		System.out.println("6. List all Books by a particular Genre");
+		System.out.println("7. Search for a Book by Title");
+		System.out.println("8. Buy a Book");
+		System.out.println("9. Exit");
 	}
 
 	/***************************************************************************
@@ -301,6 +302,10 @@ public class tftpClient {
 				String bookInfo = new String(buffer, 0, read).trim();
 				System.out.println("Received book info from the server: ");
 				System.out.println(bookInfo);
+				if (bookInfo.equals("Book not found")) {
+					System.out.println("Book not found");
+					return;
+				}
 
 				// ask if they are sure they want to modify it
 				String answer = getUserInput("Do you want to modify this book? (y/n)", new Scanner(System.in));
@@ -348,7 +353,7 @@ public class tftpClient {
 			int read = socketInputStream.readInt();
 			if (read == tftpCodes.OK) {
 				// input the title of the book
-				String title = getUserInput("Enter the title of the book", new Scanner(System.in));
+				String title = getUserInput("Enter the title of the book\n", new Scanner(System.in));
 				// send the title to the server
 				socketOutputStream.write(title.getBytes());
 				socketOutputStream.flush();
@@ -482,7 +487,7 @@ public class tftpClient {
 			if (socketInputStream.readInt() == tftpCodes.OK) {
 
 				// input the title of the book
-				String title = getUserInput("Enter the title of the book", new Scanner(System.in));
+				String title = getUserInput("Enter the title of the book\n", new Scanner(System.in));
 				// send the title to the server
 				socketOutputStream.write(title.getBytes());
 				socketOutputStream.flush();
@@ -504,7 +509,7 @@ public class tftpClient {
 					System.out.println("System is ready to buy the book.");
 
 					// ask if they are sure they want to buy it
-					String answer = getUserInput("Do you want to buy this book? (y/n)", new Scanner(System.in));
+					String answer = getUserInput("Do you want to buy this book? (y/n)\n", new Scanner(System.in));
 					if (answer.equals("y")) {
 						// send the quantity to the server
 						socketOutputStream.writeInt(tftpCodes.OK);
@@ -513,7 +518,7 @@ public class tftpClient {
 						if (tftpCodes.OK == socketInputStream.readInt()) {
 							System.out.println("Book bought successfully");
 						} else {
-							System.out.println("Server did not acknowledge the BUY_BOOK command");
+							System.out.println("The book could not be bought. Please try again later.");
 
 						}
 
@@ -669,12 +674,16 @@ public class tftpClient {
 		String genre;
 		while (true) {
 			genre = getUserInput("\nChoose a genre by entering the corresponding number: ", reader);
-			int genreIndex = Integer.parseInt(genre) - 1; // Convert to zero-based index
-			if (genreIndex >= 0 && genreIndex < genreArray.length) {
-				genre = genreArray[genreIndex]; // Assign the valid genre
-				break; // Exit the loop once a valid genre is chosen
-			} else {
-				System.out.println("Invalid genre selection. Please try again.");
+			try {
+				int genreIndex = Integer.parseInt(genre) - 1; // Convert to zero-based index
+				if (genreIndex >= 0 && genreIndex < genreArray.length) {
+					genre = genreArray[genreIndex]; // Assign the valid genre
+					break; // Exit the loop once a valid genre is chosen
+				} else {
+					System.out.println("Invalid genre selection. Please try again.");
+				}
+			} catch (NumberFormatException e) {
+				System.out.println("Invalid input. Please enter a number.");
 			}
 		}
 
@@ -696,7 +705,7 @@ public class tftpClient {
 		// Ask for the quantity
 		int quantity = getNumberInput("\nEnter the quantity of the book: ", reader);
 		// Ask for the price
-		double price = Double.parseDouble(getUserInput("\nEnter the price of the book: ", reader));
+		double price = getNumberInput("\nEnter the price of the book: ", reader);
 
 		// Construct the book info string
 		String bookInfo = title + "|" + genre + "|" + plot + "|" + String.join(",", authors) + "|"
@@ -718,7 +727,13 @@ public class tftpClient {
 	// get user input
 	private static String getUserInput(String prompt, Scanner reader) {
 		System.out.print(prompt);
-		return reader.nextLine();
+		String input = reader.nextLine();
+		while (input.trim().isEmpty()) {
+			System.out.println("Invalid input. Please enter a value.");
+			System.out.print(prompt);
+			input = reader.nextLine();
+		}
+		return input;
 	}
 
 	// get a number input
@@ -731,5 +746,16 @@ public class tftpClient {
 			input = reader.nextLine();
 		}
 		return Integer.parseInt(input);
+	}
+
+	private double getDoubleInput(String prompt, Scanner reader) {
+		System.out.print(prompt);
+		String input = reader.nextLine();
+		while (!isNumeric(input)) {
+			System.out.println("Invalid input. Please enter a number.");
+			System.out.print(prompt);
+			input = reader.nextLine();
+		}
+		return Double.parseDouble(input);
 	}
 }

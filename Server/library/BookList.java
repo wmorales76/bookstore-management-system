@@ -132,7 +132,7 @@ public class BookList {
      */
     public String getBook(String title) {
         if (head == null) { // If there are no books
-            return "No books in the list.";
+            return "Book not found.";
         }
         Node current = head;
         do {
@@ -203,4 +203,49 @@ public class BookList {
         } while (current != head); // Continue until we reach the head again
         return sb.toString().trim(); // Trim to remove the last extra newline
     }
+    public static void main(String[] args) {
+        // Create a new instance of BookList
+        BookList bookList = new BookList();
+    
+        // Create books and their author lists, then add them to the BookList
+        AuthorList authors1 = new AuthorList();
+        authors1.addAuthor(new Author("Frank", "Herbert"));
+        Book book1 = new Book("Dune", "A desert planet with valuable resource", "1965", 5, 9.99, authors1);
+    
+        AuthorList authors2 = new AuthorList();
+        authors2.addAuthor(new Author("William", "Gibson"));
+        Book book2 = new Book("Neuromancer", "A tale of cyberpunk future", "1984", 10, 15.99, authors2);
+    
+        AuthorList authors3 = new AuthorList();
+        authors3.addAuthor(new Author("J.R.R.", "Tolkien"));
+        Book book3 = new Book("The Hobbit", "A journey there and back again", "1937", 7, 8.99, authors3);
+    
+        AuthorList authors4 = new AuthorList();
+        authors4.addAuthor(new Author("George", "Orwell"));
+        Book book4 = new Book("1984", "A dystopian future society", "1949", 8, 6.99, authors4);
+    
+        AuthorList authors5 = new AuthorList();
+        authors5.addAuthor(new Author("Aldous", "Huxley"));
+        Book book5 = new Book("Brave New World", "A dystopian novel about a genetically modified society", "1932", 6, 7.99, authors5);
+    
+        // Insert books into the book list
+        bookList.insertSorted(book1);
+        bookList.insertSorted(book2);
+        bookList.insertSorted(book3);
+        bookList.insertSorted(book4);
+        bookList.insertSorted(book5);
+    
+        // Array of book titles to retrieve
+        String[] titles = {"Dune", "Neuromancer", "The Hobbit", "1984", "Brave New World", "Moby Dick"}; // Include a title that doesn't exist
+    
+        // Retrieve and display details of each book by title
+        for (String title : titles) {
+            System.out.println("Retrieving book by title '" + title + "':");
+            String result = bookList.getBook(title);
+            System.out.println(result);
+            System.out.println(); // Add a newline for better separation
+        }
+    }
+    
+    
 }
